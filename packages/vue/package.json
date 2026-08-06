@@ -24,6 +24,9 @@
   "peerDependencies": {
     "vue": "^3.5.0"
   },
+  "dependencies": {
+    "@omni-async/core": "workspace:*"
+  },
   "publishConfig": {
     "access": "public"
   }

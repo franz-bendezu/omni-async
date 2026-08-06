@@ -1,5 +1,6 @@
-import { shallowRef } from "vue";
+import { getCurrentScope, onScopeDispose, shallowRef } from "vue";
 import type { Ref } from "vue";
+import { createAsync } from "@omni-async/core";
 import type { QueryHandler, TriggerHandler } from "./types";
 
 export type AsyncOptions<Data> = {
@@ -21,36 +22,24 @@ export function useAsync<Data, P extends unknown[] = []>(
   const { concurrency = "all", onError, onSuccess } = options;
   const error = shallowRef<unknown | null>(null);
   const loading = shallowRef(false);
-  let activeRequestCount = 0;
-  let latestRequestId = 0;
+  const operation = createAsync(
+    async (_context, ...params: P) => handler(...params),
+    { concurrency, onError, onSuccess },
+  );
 
-  const trigger: TriggerHandler<Data, P> = async (...params) => {
-    const requestId = ++latestRequestId;
-    activeRequestCount += 1;
-    loading.value = true;
-    error.value = null;
-
-    try {
-      const result = await handler(...params);
-      if (concurrency === "all" || requestId === latestRequestId) {
-        onSuccess?.(result);
-      }
-      return result;
-    } catch (caughtError) {
-      if (concurrency === "all" || requestId === latestRequestId) {
-        error.value = caughtError;
-        onError?.(caughtError);
-      }
-      throw caughtError;
-    } finally {
-      activeRequestCount -= 1;
-      if (concurrency === "all") {
-        loading.value = activeRequestCount > 0;
-      } else if (requestId === latestRequestId) {
-        loading.value = false;
-      }
-    }
+  const updateState = () => {
+    const state = operation.getSnapshot();
+    error.value = state.error;
+    loading.value = state.isLoading;
   };
+  const unsubscribe = operation.subscribe(updateState);
+
+  if (getCurrentScope()) {
+    onScopeDispose(unsubscribe);
+  }
+
+  const trigger: TriggerHandler<Data, P> = (...params) =>
+    operation.execute(...params);
 
   return { error, loading, trigger };
 }
