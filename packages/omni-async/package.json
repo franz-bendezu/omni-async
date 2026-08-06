@@ -17,34 +17,16 @@
   ],
   "type": "module",
   "sideEffects": false,
-  "main": "./dist/core.mjs",
-  "types": "./dist/core.d.mts",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
-    ".": {
-      "types": "./dist/core.d.mts",
-      "import": "./dist/core.mjs",
-      "default": "./dist/core.mjs"
-    },
-    "./core": {
-      "types": "./dist/core.d.mts",
-      "import": "./dist/core.mjs",
-      "default": "./dist/core.mjs"
-    },
-    "./react": {
-      "types": "./dist/react.d.mts",
-      "import": "./dist/react.mjs",
-      "default": "./dist/react.mjs"
-    },
-    "./vue": {
-      "types": "./dist/vue.d.mts",
-      "import": "./dist/vue.mjs",
-      "default": "./dist/vue.mjs"
-    },
-    "./svelte": {
-      "types": "./dist/svelte.d.mts",
-      "import": "./dist/svelte.mjs",
-      "default": "./dist/svelte.mjs"
-    }
+    ".": "./dist/index.mjs",
+    "./react": "./dist/react.mjs",
+    "./svelte": "./dist/svelte.mjs",
+    "./vue": "./dist/vue.mjs",
+    "./package.json": "./package.json",
+    "./core": "./dist/index.mjs"
   },
   "publishConfig": {
     "access": "public"
