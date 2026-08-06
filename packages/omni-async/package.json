@@ -1,0 +1,65 @@
+{
+  "name": "omni-async",
+  "version": "0.1.0",
+  "description": "Framework-agnostic async state primitives with adapters for React, Vue, and Svelte.",
+  "homepage": "https://franz-bendezu.github.io/omni-async",
+  "bugs": {
+    "url": "https://github.com/franz-bendezu/omni-async/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/franz-bendezu/omni-async.git",
+    "directory": "packages/omni-async"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/core.mjs",
+  "types": "./dist/core.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/core.d.mts",
+      "import": "./dist/core.mjs",
+      "default": "./dist/core.mjs"
+    },
+    "./core": {
+      "types": "./dist/core.d.mts",
+      "import": "./dist/core.mjs",
+      "default": "./dist/core.mjs"
+    },
+    "./react": {
+      "types": "./dist/react.d.mts",
+      "import": "./dist/react.mjs",
+      "default": "./dist/react.mjs"
+    },
+    "./vue": {
+      "types": "./dist/vue.d.mts",
+      "import": "./dist/vue.mjs",
+      "default": "./dist/vue.mjs"
+    },
+    "./svelte": {
+      "types": "./dist/svelte.d.mts",
+      "import": "./dist/svelte.mjs",
+      "default": "./dist/svelte.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@omni-async/core": "workspace:*",
+    "@omni-async/react": "workspace:*",
+    "@omni-async/svelte": "workspace:*",
+    "@omni-async/vue": "workspace:*"
+  }
+}
