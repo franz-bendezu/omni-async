@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://unpkg.com/undocs/schema/config.json
+name: Omni Async
+shortDescription: Framework-independent asynchronous state for TypeScript.
+description: One async state engine with typed adapters for React, Vue, and Svelte.
+url: https://franz-bendezu.github.io/omni-async
+github: franz-bendezu/omni-async
+branch: main
+themeColor: cyan
+automd: true
+llms:
+  domain: https://franz-bendezu.github.io/omni-async
+  title: Omni Async Documentation
+  description: Guides and API reference for Omni Async and its framework adapters.
+  full:
+    title: Complete Omni Async Documentation
+    description: Complete guides, concepts, framework integrations, and API reference.

@@ -2,7 +2,7 @@
   "name": "@omni-async/react",
   "version": "0.1.0",
   "description": "Typed React hooks for asynchronous queries, fetches, and actions.",
-  "homepage": "https://github.com/franz-bendezu/omni-async#readme",
+  "homepage": "https://franz-bendezu.github.io/omni-async/frameworks/react",
   "bugs": {
     "url": "https://github.com/franz-bendezu/omni-async/issues"
   },

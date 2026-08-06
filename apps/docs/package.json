@@ -1,0 +1,16 @@
+{
+  "name": "@omni-async/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "undocs dev",
+    "build": "undocs build",
+    "lint": "oxlint . --deny-warnings",
+    "typecheck": "undocs build",
+    "test": "echo 'No tests for docs'",
+    "clean": "rm -rf .docs dist"
+  },
+  "devDependencies": {
+    "undocs": "^0.4.17"
+  }
+}

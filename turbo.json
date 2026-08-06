@@ -5,6 +5,9 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "@omni-async/docs#build": {
+      "outputs": [".docs/.output/**"]
+    },
     "dev": {
       "cache": false,
       "persistent": true

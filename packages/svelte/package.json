@@ -2,7 +2,7 @@
   "name": "@omni-async/svelte",
   "version": "0.1.0",
   "description": "Typed Svelte stores for asynchronous queries, fetches, and actions.",
-  "homepage": "https://github.com/franz-bendezu/omni-async#readme",
+  "homepage": "https://franz-bendezu.github.io/omni-async/frameworks/svelte",
   "bugs": {
     "url": "https://github.com/franz-bendezu/omni-async/issues"
   },
