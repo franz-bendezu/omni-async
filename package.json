@@ -8,6 +8,7 @@
     "dev": "turbo run dev --parallel",
     "test": "turbo run test",
     "bench": "turbo run bench",
+    "bench-compare": "turbo run bench-compare",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules"
   },

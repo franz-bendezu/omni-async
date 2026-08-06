@@ -21,6 +21,10 @@
       "cache": false,
       "outputs": []
     },
+    "bench-compare": {
+      "cache": false,
+      "outputs": []
+    },
     "clean": {
       "cache": false
     }

@@ -16,4 +16,5 @@ pnpm build
 pnpm typecheck
 pnpm test
 pnpm bench
+pnpm bench-compare
 ```

@@ -18,8 +18,9 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "bench": "vitest bench",
+    "test": "vitest run --project=unit",
+    "bench": "vitest bench --run --project=bench --outputJson=.bench/results-baseline.json",
+    "bench-compare": "vitest bench --run --project=bench --compare=.bench/results-baseline.json",
     "clean": "rm -rf dist"
   },
   "publishConfig": {
