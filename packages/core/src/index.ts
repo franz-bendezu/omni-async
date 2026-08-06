@@ -1,7 +1,7 @@
 export type AsyncStatus = "idle" | "loading" | "success" | "error";
 
 export type AsyncContext = {
-  signal: AbortSignal;
+  signal: AbortSignal | null;
   requestId: number;
 };
 
@@ -26,14 +26,19 @@ export type AsyncOptions<Data> = {
 };
 
 export type AsyncOperation<Data, Params extends unknown[] = []> = {
-  getSnapshot(): AsyncState<Data>;
+  getSnapshot(): Readonly<AsyncState<Data>>;
   subscribe(listener: () => void): () => void;
   execute(...params: Params): Promise<Data>;
   abort(): void;
   reset(): void;
 };
 
-const nonAbortableSignal = new AbortController().signal;
+type ActiveRequest = {
+  generationId: number;
+  requestId: number;
+  controller: AbortController | null;
+  cancelled: boolean;
+};
 
 export function createAsync<Data, Params extends unknown[] = []>(
   handler: AsyncHandler<Data, Params>,
@@ -47,15 +52,15 @@ export function createAsync<Data, Params extends unknown[] = []>(
     onSuccess,
   } = options;
   const listeners = new Set<() => void>();
-  const controllers = new Set<AbortController>();
-  let activeRequestCount = 0;
+  const activeRequests = new Set<ActiveRequest>();
+  let generationId = 0;
   let latestRequestId = 0;
-  let state: AsyncState<Data> = {
+  let state: Readonly<AsyncState<Data>> = Object.freeze({
     status: "idle",
     data: initialData,
     error: null,
     isLoading: false,
-  };
+  });
 
   const notify = () => {
     for (const listener of listeners) {
@@ -64,20 +69,36 @@ export function createAsync<Data, Params extends unknown[] = []>(
   };
 
   const updateState = (nextState: AsyncState<Data>) => {
-    state = nextState;
+    state = Object.freeze(nextState);
     notify();
   };
 
-  const isCurrentRequest = (requestId: number) =>
-    concurrency === "all" || requestId === latestRequestId;
+  const canUpdateState = (request: ActiveRequest) =>
+    request.generationId === generationId &&
+    !request.cancelled &&
+    (concurrency === "all" || request.requestId === latestRequestId);
+
+  const hasActiveRequests = () =>
+    [...activeRequests].some(
+      (request) =>
+        request.generationId === generationId && !request.cancelled,
+    );
+
+  const invalidateActiveRequests = () => {
+    for (const request of activeRequests) {
+      request.cancelled = true;
+      request.controller?.abort();
+    }
+  };
 
   const execute = async (...params: Params): Promise<Data> => {
-    const requestId = ++latestRequestId;
-    const controller = abortable ? new AbortController() : undefined;
-    if (controller) {
-      controllers.add(controller);
-    }
-    activeRequestCount += 1;
+    const request: ActiveRequest = {
+      generationId,
+      requestId: ++latestRequestId,
+      controller: abortable ? new AbortController() : null,
+      cancelled: false,
+    };
+    activeRequests.add(request);
     updateState({
       ...state,
       status: "loading",
@@ -87,41 +108,42 @@ export function createAsync<Data, Params extends unknown[] = []>(
 
     try {
       const data = await handler(
-        { signal: controller?.signal ?? nonAbortableSignal, requestId },
+        { signal: request.controller?.signal ?? null, requestId: request.requestId },
         ...params,
       );
-      if (isCurrentRequest(requestId)) {
+      if (canUpdateState(request)) {
         updateState({ status: "success", data, error: null, isLoading: true });
         onSuccess?.(data);
       }
       return data;
     } catch (error) {
-      if (isCurrentRequest(requestId)) {
+      if (canUpdateState(request)) {
         updateState({ ...state, status: "error", error, isLoading: true });
         onError?.(error);
       }
       throw error;
     } finally {
-      if (controller) {
-        controllers.delete(controller);
-      }
-      activeRequestCount -= 1;
-      if (concurrency === "all") {
-        updateState({ ...state, isLoading: activeRequestCount > 0 });
-      } else if (requestId === latestRequestId) {
-        updateState({ ...state, isLoading: false });
+      activeRequests.delete(request);
+      if (canUpdateState(request)) {
+        if (concurrency === "all") {
+          updateState({ ...state, isLoading: hasActiveRequests() });
+        } else if (request.requestId === latestRequestId) {
+          updateState({ ...state, isLoading: false });
+        }
       }
     }
   };
 
   const abort = () => {
-    for (const controller of controllers) {
-      controller.abort();
-    }
+    if (activeRequests.size === 0) return;
+
+    invalidateActiveRequests();
+    updateState({ ...state, status: "idle", error: null, isLoading: false });
   };
 
   const reset = () => {
-    abort();
+    invalidateActiveRequests();
+    generationId += 1;
     latestRequestId += 1;
     updateState({
       status: "idle",
