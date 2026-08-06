@@ -33,6 +33,16 @@ export function useAsync<Data, P extends unknown[] = [], Empty extends null | un
   options: AsyncOptions<Data, Empty> & { initialData: Data | Empty },
 ): AsyncResult<Data, P, Empty>;
 
+/**
+ * Creates Vue refs for an async handler with configurable concurrency and fallback data.
+ *
+ * @param handler - Async function invoked by `trigger`.
+ * @param options - Initial data, concurrency, equality, and lifecycle callbacks.
+ * @returns Data, error and loading refs together with a typed trigger function.
+ * @example
+ * const save = useAsync((name: string) => api.saveProfile({ name }))
+ * await save.trigger("Ada")
+ */
 export function useAsync<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
   options: AsyncOptions<Data, null | undefined> = {},

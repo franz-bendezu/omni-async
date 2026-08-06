@@ -1,2 +1,8 @@
-.docs
+.docs/*
+!.docs/components/
+.docs/components/*
+!.docs/public/
+.docs/public/*
+!.docs/public/icon.svg
+!.docs/components/LandingBackground.vue
 dist

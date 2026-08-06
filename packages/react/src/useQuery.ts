@@ -18,6 +18,16 @@ export function useQuery<Data, Params extends unknown[] = []>(
   options?: QueryOptions<Data>,
 ): QueryResult<Data, Params, undefined>;
 
+/**
+ * Creates a latest-request-wins query for data that may be refreshed on demand.
+ *
+ * @param handler - Async query function invoked by `trigger`.
+ * @param options - Initial data and lifecycle callbacks.
+ * @returns Reactive query state and a typed trigger function.
+ * @example
+ * const users = useQuery(() => api.listUsers(), { initial: () => [] })
+ * await users.trigger()
+ */
 export function useQuery<Data, Params extends unknown[] = []>(
   handler: QueryHandler<Data, Params>,
   options: QueryOptions<Data> = {},

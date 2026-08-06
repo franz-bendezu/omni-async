@@ -1,44 +1,68 @@
+/** Lifecycle status of an asynchronous operation. */
 export type AsyncStatus = "idle" | "loading" | "success" | "error";
 
+/** Context supplied to an {@link AsyncHandler} for the current request. */
 export type AsyncContext = {
+  /** Abort signal when `abortable` is enabled, otherwise `null`. */
   signal: AbortSignal | null;
+  /** Monotonically increasing identifier local to the operation. */
   requestId: number;
 };
 
+/** Immutable data exposed by an {@link AsyncOperation}. */
 export type AsyncState<Data, Empty extends null | undefined = null> = {
+  /** Current lifecycle status. */
   status: AsyncStatus;
+  /** Most recently accepted data, or the configured empty value. */
   data: Data | Empty;
+  /** Most recently accepted error. */
   error: unknown | null;
+  /** Whether an accepted request is still active. */
   isLoading: boolean;
 };
 
+/** Function executed by an {@link AsyncOperation}. */
 export type AsyncHandler<Data, Params extends unknown[] = []> = (
   context: AsyncContext,
   ...params: Params
 ) => Promise<Data>;
 
+/** Configuration for {@link createAsync}. */
 export type AsyncOptions<Data, Empty extends null | undefined = null> = {
+  /** Data used for the initial state and after reset. */
   initialData?: Data | Empty;
+  /** Produces replacement data when a request rejects. Existing data is preserved by default. */
   dataOnError?: (error: unknown) => Data | Empty;
+  /** Controls whether all requests or only the latest request may update state. @defaultValue `"all"` */
   concurrency?: "all" | "latest";
+  /** Creates an `AbortController` for each request. @defaultValue `false` */
   abortable?: boolean;
+  /** Determines whether a proposed state update should notify subscribers. */
   isEqual?: (
     previous: Readonly<AsyncState<Data, null | undefined>>,
     next: Readonly<AsyncState<Data, null | undefined>>,
   ) => boolean;
+  /** Called after an accepted successful state update. */
   onSuccess?: (data: Data) => void;
+  /** Called after an accepted error state update. */
   onError?: (error: unknown) => void;
 };
 
+/** Observable and controllable asynchronous operation returned by {@link createAsync}. */
 export type AsyncOperation<
   Data,
   Params extends unknown[] = [],
   Empty extends null | undefined = null,
 > = {
+  /** Returns the current frozen state snapshot. */
   getSnapshot(): Readonly<AsyncState<Data, Empty>>;
+  /** Subscribes to accepted state changes and returns an unsubscribe function. */
   subscribe(listener: () => void): () => void;
+  /** Executes the handler with the supplied parameters. */
   execute(...params: Params): Promise<Data>;
+  /** Aborts supported work, invalidates active requests, and returns to idle. */
   abort(): void;
+  /** Invalidates active requests and restores the initial state. */
   reset(): void;
 };
 
@@ -61,6 +85,26 @@ function isAsyncStateEqual<Data, Empty extends null | undefined>(
   );
 }
 
+/**
+ * Creates an observable asynchronous operation.
+ *
+ * @typeParam Data - Value resolved by the handler.
+ * @typeParam Params - Tuple of arguments accepted by `execute`.
+ * @param handler - Async function executed for every request.
+ * @param options - Initial state, concurrency, cancellation, and lifecycle options.
+ * @returns A stateful operation that can be executed, observed, aborted, and reset.
+ *
+ * @example
+ * ```ts
+ * const user = createAsync(
+ *   ({ signal }, id: string) => fetch(`/users/${id}`, { signal }).then(r => r.json()),
+ *   { concurrency: "latest", abortable: true },
+ * )
+ *
+ * await user.execute("42")
+ * console.log(user.getSnapshot().data)
+ * ```
+ */
 export function createAsync<Data, Params extends unknown[] = []>(
   handler: AsyncHandler<Data, Params>,
   options?: AsyncOptions<Data, null>,
@@ -75,6 +119,16 @@ export function createAsync<
   options: AsyncOptions<Data, Empty> & { initialData: Data | Empty },
 ): AsyncOperation<Data, Params, Empty>;
 
+/**
+ * Creates an observable async operation with explicit concurrency, cancellation, and lifecycle state.
+ *
+ * @param handler - Async function executed for every request.
+ * @param options - Initial state, concurrency, cancellation, and lifecycle options.
+ * @returns A stateful operation that can be executed, observed, aborted, and reset.
+ * @example
+ * const operation = createAsync((_context, id: string) => loadUser(id))
+ * await operation.execute("42")
+ */
 export function createAsync<Data, Params extends unknown[] = []>(
   handler: AsyncHandler<Data, Params>,
   options: AsyncOptions<Data, null | undefined> = {},

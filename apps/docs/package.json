@@ -8,9 +8,10 @@
     "lint": "oxlint . --deny-warnings",
     "typecheck": "undocs build",
     "test": "echo 'No tests for docs'",
-    "clean": "rm -rf .docs dist"
+    "clean": "rm -rf .docs/.nuxt .docs/.output .docs/node_modules dist"
   },
   "devDependencies": {
+    "automd": "^0.4.3",
     "undocs": "^0.4.17"
   }
 }

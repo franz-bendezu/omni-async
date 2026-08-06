@@ -35,6 +35,9 @@ importers:
 
   apps/docs:
     devDependencies:
+      automd:
+        specifier: ^0.4.3
+        version: 0.4.3(magicast@0.5.4)
       undocs:
         specifier: ^0.4.17
         version: 0.4.17(6e0ce457ebdbc9e890917c9145428a38)

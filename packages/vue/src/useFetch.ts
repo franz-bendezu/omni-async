@@ -26,6 +26,16 @@ export function useFetch<Data>(
   options?: QueryOptions<Data>,
 ): IFetchResult<Data, undefined>;
 
+/**
+ * Runs an abortable fetch when the component mounts and cancels it on unmount.
+ *
+ * @param handler - Fetch function that receives an `AbortSignal`.
+ * @param options - Initial data and lifecycle callbacks.
+ * @returns Fetch refs together with `fetch` and `abort` controls.
+ * @example
+ * const profile = useFetch((signal) => fetchProfile({ signal }))
+ * await profile.fetch()
+ */
 export function useFetch<Data>(
   handler: FetchHandler<Data>,
   options?: QueryOptions<Data>,
