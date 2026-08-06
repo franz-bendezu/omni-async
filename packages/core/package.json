@@ -2,7 +2,7 @@
   "name": "@omni-async/core",
   "version": "0.1.0",
   "description": "Framework-agnostic async state primitives for TypeScript.",
-  "homepage": "https://github.com/franz-bendezu/omni-async#readme",
+  "homepage": "https://franz-bendezu.github.io/omni-async/api",
   "bugs": {
     "url": "https://github.com/franz-bendezu/omni-async/issues"
   },
