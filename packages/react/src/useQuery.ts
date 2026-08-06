@@ -24,6 +24,9 @@ export function useQuery<Data, Params extends unknown[] = []>(
  * @param handler - Async query function invoked by `trigger`.
  * @param options - Initial data and lifecycle callbacks.
  * @returns Reactive query state and a typed trigger function.
+ * @example
+ * const users = useQuery(() => api.listUsers(), { initial: () => [] })
+ * await users.trigger()
  */
 export function useQuery<Data, Params extends unknown[] = []>(
   handler: QueryHandler<Data, Params>,

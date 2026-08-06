@@ -125,6 +125,9 @@ export function createAsync<
  * @param handler - Async function executed for every request.
  * @param options - Initial state, concurrency, cancellation, and lifecycle options.
  * @returns A stateful operation that can be executed, observed, aborted, and reset.
+ * @example
+ * const operation = createAsync((_context, id: string) => loadUser(id))
+ * await operation.execute("42")
  */
 export function createAsync<Data, Params extends unknown[] = []>(
   handler: AsyncHandler<Data, Params>,

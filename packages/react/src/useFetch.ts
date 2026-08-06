@@ -24,6 +24,9 @@ export function useFetch<Data>(
  * @param handler - Fetch function that receives an `AbortSignal`.
  * @param options - Initial data and lifecycle callbacks.
  * @returns Fetch state together with `fetch` and `abort` controls.
+ * @example
+ * const profile = useFetch((signal) => fetchProfile({ signal }))
+ * await profile.fetch()
  */
 export function useFetch<Data>(
   handler: FetchHandler<Data>,

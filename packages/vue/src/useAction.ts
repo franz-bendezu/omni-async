@@ -14,6 +14,9 @@ export interface ActionResult<Data, P extends unknown[]> {
  * @param handler - Async action invoked by `trigger`.
  * @param options - Success and error callbacks.
  * @returns Error and loading refs together with a typed trigger.
+ * @example
+ * const removeUser = useAction((id: string) => api.deleteUser(id))
+ * await removeUser.trigger("42")
  */
 export function useAction<Data, P extends unknown[]>(
   handler: QueryHandler<Data, P>,

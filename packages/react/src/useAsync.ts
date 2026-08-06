@@ -42,6 +42,9 @@ export function useAsync<
  * @param handler - Async function invoked by `trigger`.
  * @param options - Initial data, concurrency, equality, and lifecycle callbacks.
  * @returns The current data, error and loading state together with a trigger function.
+ * @example
+ * const save = useAsync((name: string) => api.saveProfile({ name }))
+ * await save.trigger("Ada")
  */
 export function useAsync<Data, Params extends unknown[] = []>(
   handler: QueryHandler<Data, Params>,
