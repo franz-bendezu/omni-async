@@ -1,0 +1,33 @@
+{
+  "name": "@omni-async/svelte",
+  "version": "0.0.1",
+  "description": "Typed Svelte stores for asynchronous queries, fetches, and actions.",
+  "license": "MIT",
+  "type": "module",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  },
+  "dependencies": {
+    "@omni-async/core": "workspace:*"
+  },
+  "devDependencies": {
+    "svelte": "^5.0.0"
+  }
+}
