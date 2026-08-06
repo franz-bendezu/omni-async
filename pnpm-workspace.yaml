@@ -1,4 +1,6 @@
 packages:
   - "packages/*"
+onlyBuiltDependencies:
+  - esbuild
 minimumReleaseAgeExclude:
   - tsx@4.23.8
