@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import { defineComponent, h } from "vue";
+import { defineComponent, effectScope, h } from "vue";
 import { describe, expect, it, vi } from "vitest";
 import { useFetch } from "../src";
 
@@ -28,12 +28,32 @@ describe("useFetch", () => {
     wrapper.vm.abort();
 
     await vi.waitFor(() => {
-      expect(handler.mock.calls[0]?.[0].aborted).toBe(true);
+      expect(handler.mock.calls[0]?.[0]?.aborted).toBe(true);
       expect(errorHandler).toHaveBeenCalledWith(
         expect.objectContaining({ name: "AbortError" }),
         expect.anything(),
         expect.any(String),
       );
     });
+  });
+
+  it("aborts the active request when its effect scope is disposed", async () => {
+    const handler = vi.fn((_signal: AbortSignal) => new Promise<never>(() => {}));
+    let stopScope = () => {};
+    const Component = defineComponent({
+      setup() {
+        const scope = effectScope();
+        scope.run(() => useFetch(handler));
+        stopScope = () => scope.stop();
+      },
+      render: () => h("div"),
+    });
+    const wrapper = mount(Component);
+
+    await vi.waitFor(() => expect(handler).toHaveBeenCalledOnce());
+    stopScope();
+
+    expect(handler.mock.calls[0]?.[0]?.aborted).toBe(true);
+    wrapper.unmount();
   });
 });

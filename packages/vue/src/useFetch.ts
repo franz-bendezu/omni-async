@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onScopeDispose } from "vue";
 import type {
   DataInitializer,
   FetchHandler,
@@ -57,7 +57,7 @@ export function useFetch<Data>(
     await fetch();
   });
 
-  onUnmounted(abort);
+  onScopeDispose(abort);
 
   return { data, error, loading, fetch, abort };
 }
