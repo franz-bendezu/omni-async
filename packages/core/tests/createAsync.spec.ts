@@ -58,7 +58,7 @@ describe("createAsync", () => {
           });
         }),
     );
-    const operation = createAsync(handler);
+    const operation = createAsync(handler, { abortable: true });
     const execution = operation.execute();
 
     operation.abort();

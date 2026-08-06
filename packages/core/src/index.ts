@@ -20,6 +20,7 @@ export type AsyncHandler<Data, Params extends unknown[] = []> = (
 export type AsyncOptions<Data> = {
   initialData?: Data | null;
   concurrency?: "all" | "latest";
+  abortable?: boolean;
   onSuccess?: (data: Data) => void;
   onError?: (error: unknown) => void;
 };
@@ -32,11 +33,19 @@ export type AsyncOperation<Data, Params extends unknown[] = []> = {
   reset(): void;
 };
 
+const nonAbortableSignal = new AbortController().signal;
+
 export function createAsync<Data, Params extends unknown[] = []>(
   handler: AsyncHandler<Data, Params>,
   options: AsyncOptions<Data> = {},
 ): AsyncOperation<Data, Params> {
-  const { concurrency = "all", initialData = null, onError, onSuccess } = options;
+  const {
+    abortable = false,
+    concurrency = "all",
+    initialData = null,
+    onError,
+    onSuccess,
+  } = options;
   const listeners = new Set<() => void>();
   const controllers = new Set<AbortController>();
   let activeRequestCount = 0;
@@ -64,8 +73,10 @@ export function createAsync<Data, Params extends unknown[] = []>(
 
   const execute = async (...params: Params): Promise<Data> => {
     const requestId = ++latestRequestId;
-    const controller = new AbortController();
-    controllers.add(controller);
+    const controller = abortable ? new AbortController() : undefined;
+    if (controller) {
+      controllers.add(controller);
+    }
     activeRequestCount += 1;
     updateState({
       ...state,
@@ -75,7 +86,10 @@ export function createAsync<Data, Params extends unknown[] = []>(
     });
 
     try {
-      const data = await handler({ signal: controller.signal, requestId }, ...params);
+      const data = await handler(
+        { signal: controller?.signal ?? nonAbortableSignal, requestId },
+        ...params,
+      );
       if (isCurrentRequest(requestId)) {
         updateState({ status: "success", data, error: null, isLoading: true });
         onSuccess?.(data);
@@ -88,7 +102,9 @@ export function createAsync<Data, Params extends unknown[] = []>(
       }
       throw error;
     } finally {
-      controllers.delete(controller);
+      if (controller) {
+        controllers.delete(controller);
+      }
       activeRequestCount -= 1;
       if (concurrency === "all") {
         updateState({ ...state, isLoading: activeRequestCount > 0 });
