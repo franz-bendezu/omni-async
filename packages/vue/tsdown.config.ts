@@ -8,4 +8,8 @@ export default defineConfig({
   deps: {
     neverBundle: ["vue"],
   },
+  exports: {
+    legacy: true,
+    packageJson: true,
+  },
 });
