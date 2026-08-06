@@ -1,6 +1,6 @@
 {
   "name": "omni-async",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -10,12 +10,16 @@
     "lint:fix": "oxlint . --fix",
     "format": "oxfmt .",
     "format:check": "oxfmt . --check",
+    "release": "bumpp -r --sign --execute \"pnpm install --lockfile-only && pnpm release:verify\"",
+    "release:verify": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build",
+    "release:publish": "pnpm -r publish --access public --no-git-checks",
     "bench": "turbo run bench",
     "bench-compare": "turbo run bench-compare",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
+    "bumpp": "^12.1.1",
     "jsdom": "^29.0.0",
     "oxfmt": "^0.62.0",
     "oxlint": "^1.77.0",

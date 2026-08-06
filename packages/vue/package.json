@@ -2,11 +2,21 @@
   "name": "@omni-async/vue",
   "version": "0.0.1",
   "description": "Typed Vue composables for asynchronous queries, fetches, and actions.",
+  "homepage": "https://github.com/franz-bendezu/omni-async#readme",
+  "bugs": {
+    "url": "https://github.com/franz-bendezu/omni-async/issues"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/franz-bendezu/omni-async.git",
+    "directory": "packages/vue"
+  },
   "files": [
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
