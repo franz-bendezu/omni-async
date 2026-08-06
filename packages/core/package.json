@@ -19,6 +19,7 @@
     "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "bench": "vitest bench",
     "clean": "rm -rf dist"
   },
   "publishConfig": {

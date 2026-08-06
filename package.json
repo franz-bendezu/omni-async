@@ -7,6 +7,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
     "test": "turbo run test",
+    "bench": "turbo run bench",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules"
   },
@@ -16,7 +17,7 @@
     "tsdown": "^0.22.14",
     "turbo": "^2.10.8",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.10",
+    "vitest": "4.1.10",
     "vue": "^3.5.32"
   }
 }
