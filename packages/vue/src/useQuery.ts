@@ -17,6 +17,13 @@ export function useQuery<Data, P extends unknown[] = []>(
   options?: QueryOptions<Data>,
 ): IQueryResult<Data, P, undefined>;
 
+/**
+ * Creates a latest-request-wins Vue query that may optionally share an external data ref.
+ *
+ * @param handler - Async query function invoked by `trigger`.
+ * @param options - Initial data, shared data ref, and lifecycle callbacks.
+ * @returns Query refs and a typed trigger function.
+ */
 export function useQuery<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
   options?: QueryOptions<Data>,

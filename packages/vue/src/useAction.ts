@@ -8,6 +8,13 @@ export interface ActionResult<Data, P extends unknown[]> {
   trigger: TriggerHandler<Data, P>;
 }
 
+/**
+ * Creates an on-demand Vue async action without retaining its resolved value.
+ *
+ * @param handler - Async action invoked by `trigger`.
+ * @param options - Success and error callbacks.
+ * @returns Error and loading refs together with a typed trigger.
+ */
 export function useAction<Data, P extends unknown[]>(
   handler: QueryHandler<Data, P>,
   options?: ActionOptions<Data>,
