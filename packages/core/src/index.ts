@@ -53,6 +53,7 @@ export function createAsync<Data, Params extends unknown[] = []>(
   } = options;
   const listeners = new Set<() => void>();
   const activeRequests = new Set<ActiveRequest>();
+  let activeRequestCount = 0;
   let generationId = 0;
   let latestRequestId = 0;
   let state: Readonly<AsyncState<Data>> = Object.freeze({
@@ -78,21 +79,12 @@ export function createAsync<Data, Params extends unknown[] = []>(
     !request.cancelled &&
     (concurrency === "all" || request.requestId === latestRequestId);
 
-  const hasActiveRequests = () => {
-    for (const request of activeRequests) {
-      if (request.generationId === generationId && !request.cancelled) {
-        return true;
-      }
-    }
-
-    return false;
-  };
-
   const invalidateActiveRequests = () => {
     for (const request of activeRequests) {
       request.cancelled = true;
       request.controller?.abort();
     }
+    activeRequestCount = 0;
   };
 
   const execute = async (...params: Params): Promise<Data> => {
@@ -103,6 +95,7 @@ export function createAsync<Data, Params extends unknown[] = []>(
       cancelled: false,
     };
     activeRequests.add(request);
+    activeRequestCount += 1;
     updateState({
       ...state,
       status: "loading",
@@ -128,9 +121,12 @@ export function createAsync<Data, Params extends unknown[] = []>(
       throw error;
     } finally {
       activeRequests.delete(request);
+      if (request.generationId === generationId && !request.cancelled) {
+        activeRequestCount -= 1;
+      }
       if (canUpdateState(request)) {
         if (concurrency === "all") {
-          updateState({ ...state, isLoading: hasActiveRequests() });
+          updateState({ ...state, isLoading: activeRequestCount > 0 });
         } else if (request.requestId === latestRequestId) {
           updateState({ ...state, isLoading: false });
         }

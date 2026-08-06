@@ -2,6 +2,16 @@ import { describe, expect, it, vi } from "vitest";
 import { createAsync } from "../src";
 
 describe("createAsync", () => {
+  it("returns the same snapshot until state changes", async () => {
+    const operation = createAsync(async () => "done");
+    const initial = operation.getSnapshot();
+
+    expect(operation.getSnapshot()).toBe(initial);
+    const execution = operation.execute();
+    expect(operation.getSnapshot()).not.toBe(initial);
+    await execution;
+  });
+
   it("publishes state changes and returns handler data", async () => {
     const handler = vi.fn(async () => "done");
     const operation = createAsync(handler, { initialData: "initial" });
@@ -16,6 +26,18 @@ describe("createAsync", () => {
       isLoading: false,
     });
     expect(listener).toHaveBeenCalled();
+    expect(listener).toHaveBeenCalled();
+  });
+
+  it("stops publishing after a listener unsubscribes", async () => {
+    const operation = createAsync(async () => "done");
+    const listener = vi.fn();
+    const unsubscribe = operation.subscribe(listener);
+
+    unsubscribe();
+    await operation.execute();
+
+    expect(listener).not.toHaveBeenCalled();
   });
 
   it("keeps the latest result with latest concurrency", async () => {
@@ -47,6 +69,27 @@ describe("createAsync", () => {
     await first;
 
     expect(operation.getSnapshot().data).toBe("newest");
+  });
+
+  it("stays loading until every concurrent all request settles", async () => {
+    const resolvers: Array<(value: string) => void> = [];
+    const operation = createAsync(
+      () =>
+        new Promise<string>((resolve) => {
+          resolvers.push(resolve);
+        }),
+      { concurrency: "all" },
+    );
+    const first = operation.execute();
+    const second = operation.execute();
+
+    resolvers[0]?.("first");
+    await first;
+    expect(operation.getSnapshot().isLoading).toBe(true);
+
+    resolvers[1]?.("second");
+    await second;
+    expect(operation.getSnapshot().isLoading).toBe(false);
   });
 
   it("aborts every active handler", async () => {
