@@ -1,4 +1,3 @@
-import { shallowRef } from "vue";
 import type {
   DataInitializer,
   IQueryResult,
@@ -22,24 +21,31 @@ export function useQuery<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
   options?: QueryOptions<Data>,
 ): IQueryResult<Data, P, DataInitializer<Data> | undefined> {
-  const {
-    initial,
-    onError,
-    onSuccess,
-    data = shallowRef(initial?.()),
-  } = options || {};
+  const { initial, onError, onSuccess, data: providedData } = options || {};
+  const initialData = providedData ? providedData.value : initial?.();
 
-  const { error, loading, trigger } = useAsync(handler, {
+  const result = useAsync<Data, P, undefined>(handler, {
     concurrency: "latest",
+    initialData,
+    getErrorData: () => {
+      const fallback = initial ? initial() : undefined;
+      if (providedData) providedData.value = fallback;
+      return fallback;
+    },
     onSuccess: (result) => {
-      data.value = result;
+      if (providedData) providedData.value = result;
       onSuccess?.(result);
     },
     onError: (caughtError) => {
-      data.value = initial ? initial() : undefined;
       onError?.(caughtError);
     },
   });
+  const data = providedData ?? result.data;
 
-  return { data, error, loading, trigger };
+  return {
+    data,
+    error: result.error,
+    loading: result.loading,
+    trigger: result.trigger,
+  };
 }

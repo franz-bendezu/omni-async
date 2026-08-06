@@ -25,8 +25,43 @@ describe("createAsync", () => {
       error: null,
       isLoading: false,
     });
-    expect(listener).toHaveBeenCalled();
-    expect(listener).toHaveBeenCalled();
+    expect(listener).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not republish an identical loading state", async () => {
+    const resolvers: Array<(value: string) => void> = [];
+    const operation = createAsync(
+      () =>
+        new Promise<string>((resolve) => {
+          resolvers.push(resolve);
+        }),
+    );
+    const listener = vi.fn();
+    operation.subscribe(listener);
+
+    const first = operation.execute();
+    const second = operation.execute();
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    resolvers[0]?.("first");
+    await first;
+    resolvers[1]?.("second");
+    await second;
+
+    expect(listener).toHaveBeenCalledTimes(3);
+  });
+
+  it("supports custom snapshot equality", async () => {
+    const operation = createAsync(async () => "done", {
+      isEqual: (_previous, next) => next.status === "success",
+    });
+    const listener = vi.fn();
+    operation.subscribe(listener);
+
+    await operation.execute();
+
+    expect(listener).toHaveBeenCalledOnce();
+    expect(operation.getSnapshot().status).toBe("loading");
   });
 
   it("stops publishing after a listener unsubscribes", async () => {

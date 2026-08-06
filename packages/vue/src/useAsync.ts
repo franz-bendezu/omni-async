@@ -1,15 +1,27 @@
 import { computed, getCurrentScope, onScopeDispose, shallowRef } from "vue";
 import type { Ref } from "vue";
 import { createAsync } from "@omni-async/core";
+import type { AsyncState } from "@omni-async/core";
 import type { QueryHandler, TriggerHandler } from "./types";
 
-export type AsyncOptions<Data> = {
+export type AsyncOptions<Data, Empty extends null | undefined = null> = {
   onSuccess?: (data: Data) => void;
   onError?: (error: unknown) => void;
   concurrency?: "all" | "latest";
+  initialData?: Data | Empty;
+  getErrorData?: (error: unknown) => Data | Empty;
+  isEqual?: (
+    previous: Readonly<AsyncState<Data, null | undefined>>,
+    next: Readonly<AsyncState<Data, null | undefined>>,
+  ) => boolean;
 };
 
-export type AsyncResult<Data, P extends unknown[]> = {
+export type AsyncResult<
+  Data,
+  P extends unknown[],
+  Empty extends null | undefined = null,
+> = {
+  data: Ref<Data | Empty>;
   error: Ref<unknown | null>;
   loading: Ref<boolean>;
   trigger: TriggerHandler<Data, P>;
@@ -17,16 +29,49 @@ export type AsyncResult<Data, P extends unknown[]> = {
 
 export function useAsync<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
-  options: AsyncOptions<Data> = {},
-): AsyncResult<Data, P> {
-  const { concurrency = "all", onError, onSuccess } = options;
-  const operation = createAsync(
+  options?: AsyncOptions<Data, null>,
+): AsyncResult<Data, P, null>;
+
+export function useAsync<
+  Data,
+  P extends unknown[] = [],
+  Empty extends null | undefined = null,
+>(
+  handler: QueryHandler<Data, P>,
+  options: AsyncOptions<Data, Empty> & { initialData: Data | Empty },
+): AsyncResult<Data, P, Empty>;
+
+export function useAsync<Data, P extends unknown[] = []>(
+  handler: QueryHandler<Data, P>,
+  options: AsyncOptions<Data, null | undefined> = {},
+): AsyncResult<Data, P, null | undefined> {
+  const {
+    concurrency = "all",
+    getErrorData,
+    initialData,
+    isEqual,
+    onError,
+    onSuccess,
+  } = options;
+  const operationOptions = {
+    concurrency,
+    ...(getErrorData ? { getErrorData } : {}),
+    ...(isEqual ? { isEqual } : {}),
+    ...("initialData" in options ? { initialData } : {}),
+    onError,
+    onSuccess,
+  };
+  const operation = createAsync<Data, P, null | undefined>(
     async (_context, ...params: P) => handler(...params),
-    { concurrency, onError, onSuccess },
+    {
+      ...operationOptions,
+      initialData: "initialData" in options ? initialData : null,
+    },
   );
   const state = shallowRef(operation.getSnapshot());
   const error = computed(() => state.value.error);
   const loading = computed(() => state.value.isLoading);
+  const data = computed(() => state.value.data);
 
   const updateState = () => {
     state.value = operation.getSnapshot();
@@ -34,11 +79,14 @@ export function useAsync<Data, P extends unknown[] = []>(
   const unsubscribe = operation.subscribe(updateState);
 
   if (getCurrentScope()) {
-    onScopeDispose(unsubscribe);
+    onScopeDispose(() => {
+      unsubscribe();
+      operation.abort();
+    });
   }
 
   const trigger: TriggerHandler<Data, P> = (...params) =>
     operation.execute(...params);
 
-  return { error, loading, trigger };
+  return { data, error, loading, trigger };
 }

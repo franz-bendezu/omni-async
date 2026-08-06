@@ -5,9 +5,9 @@ export type AsyncContext = {
   requestId: number;
 };
 
-export type AsyncState<Data> = {
+export type AsyncState<Data, Empty extends null | undefined = null> = {
   status: AsyncStatus;
-  data: Data | null;
+  data: Data | Empty;
   error: unknown | null;
   isLoading: boolean;
 };
@@ -17,16 +17,28 @@ export type AsyncHandler<Data, Params extends unknown[] = []> = (
   ...params: Params
 ) => Promise<Data>;
 
-export type AsyncOptions<Data> = {
-  initialData?: Data | null;
+export type AsyncOptions<
+  Data,
+  Empty extends null | undefined = null,
+> = {
+  initialData?: Data | Empty;
+  getErrorData?: (error: unknown) => Data | Empty;
   concurrency?: "all" | "latest";
   abortable?: boolean;
+  isEqual?: (
+    previous: Readonly<AsyncState<Data, null | undefined>>,
+    next: Readonly<AsyncState<Data, null | undefined>>,
+  ) => boolean;
   onSuccess?: (data: Data) => void;
   onError?: (error: unknown) => void;
 };
 
-export type AsyncOperation<Data, Params extends unknown[] = []> = {
-  getSnapshot(): Readonly<AsyncState<Data>>;
+export type AsyncOperation<
+  Data,
+  Params extends unknown[] = [],
+  Empty extends null | undefined = null,
+> = {
+  getSnapshot(): Readonly<AsyncState<Data, Empty>>;
   subscribe(listener: () => void): () => void;
   execute(...params: Params): Promise<Data>;
   abort(): void;
@@ -40,23 +52,51 @@ type ActiveRequest = {
   cancelled: boolean;
 };
 
+function isAsyncStateEqual<Data, Empty extends null | undefined>(
+  previous: Readonly<AsyncState<Data, Empty>>,
+  next: Readonly<AsyncState<Data, Empty>>,
+) {
+  return (
+    previous.status === next.status &&
+    Object.is(previous.data, next.data) &&
+    Object.is(previous.error, next.error) &&
+    previous.isLoading === next.isLoading
+  );
+}
+
 export function createAsync<Data, Params extends unknown[] = []>(
   handler: AsyncHandler<Data, Params>,
-  options: AsyncOptions<Data> = {},
-): AsyncOperation<Data, Params> {
+  options?: AsyncOptions<Data, null>,
+): AsyncOperation<Data, Params, null>;
+
+export function createAsync<
+  Data,
+  Params extends unknown[] = [],
+  Empty extends null | undefined = null,
+>(
+  handler: AsyncHandler<Data, Params>,
+  options: AsyncOptions<Data, Empty> & { initialData: Data | Empty },
+): AsyncOperation<Data, Params, Empty>;
+
+export function createAsync<Data, Params extends unknown[] = []>(
+  handler: AsyncHandler<Data, Params>,
+  options: AsyncOptions<Data, null | undefined> = {},
+): AsyncOperation<Data, Params, null | undefined> {
   const {
     abortable = false,
     concurrency = "all",
-    initialData = null,
+    getErrorData,
+    isEqual = isAsyncStateEqual,
     onError,
     onSuccess,
   } = options;
+  const initialData = "initialData" in options ? options.initialData : null;
   const listeners = new Set<() => void>();
   const activeRequests = new Set<ActiveRequest>();
   let activeRequestCount = 0;
   let generationId = 0;
   let latestRequestId = 0;
-  let state: Readonly<AsyncState<Data>> = Object.freeze({
+  let state: Readonly<AsyncState<Data, null | undefined>> = Object.freeze({
     status: "idle",
     data: initialData,
     error: null,
@@ -69,7 +109,8 @@ export function createAsync<Data, Params extends unknown[] = []>(
     }
   };
 
-  const updateState = (nextState: AsyncState<Data>) => {
+  const updateState = (nextState: AsyncState<Data, null | undefined>) => {
+    if (isEqual(state, nextState)) return;
     state = Object.freeze(nextState);
     notify();
   };
@@ -103,34 +144,49 @@ export function createAsync<Data, Params extends unknown[] = []>(
       isLoading: true,
     });
 
+    let finished = false;
+    const finishRequest = () => {
+      if (finished) return;
+      finished = true;
+      activeRequests.delete(request);
+      if (request.generationId === generationId && !request.cancelled) {
+        activeRequestCount -= 1;
+      }
+    };
+    const isStillLoading = () =>
+      concurrency === "all" ? activeRequestCount > 0 : false;
+
     try {
       const data = await handler(
         { signal: request.controller?.signal ?? null, requestId: request.requestId },
         ...params,
       );
+      finishRequest();
       if (canUpdateState(request)) {
-        updateState({ status: "success", data, error: null, isLoading: true });
+        updateState({
+          status: "success",
+          data,
+          error: null,
+          isLoading: isStillLoading(),
+        });
         onSuccess?.(data);
       }
       return data;
     } catch (error) {
+      finishRequest();
       if (canUpdateState(request)) {
-        updateState({ ...state, status: "error", error, isLoading: true });
+        updateState({
+          ...state,
+          status: "error",
+          data: getErrorData ? getErrorData(error) : state.data,
+          error,
+          isLoading: isStillLoading(),
+        });
         onError?.(error);
       }
       throw error;
     } finally {
-      activeRequests.delete(request);
-      if (request.generationId === generationId && !request.cancelled) {
-        activeRequestCount -= 1;
-      }
-      if (canUpdateState(request)) {
-        if (concurrency === "all") {
-          updateState({ ...state, isLoading: activeRequestCount > 0 });
-        } else if (request.requestId === latestRequestId) {
-          updateState({ ...state, isLoading: false });
-        }
-      }
+      finishRequest();
     }
   };
 

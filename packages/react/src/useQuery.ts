@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import type {
   DataInitializer,
   QueryHandler,
@@ -24,16 +24,24 @@ export function useQuery<Data, Params extends unknown[] = []>(
 ): QueryResult<Data, Params, DataInitializer<Data> | undefined> {
   const initialRef = useRef(options.initial);
   initialRef.current = options.initial;
-  const [data, setData] = useState<Data | undefined>(() => options.initial?.());
+  const initialDataRef = useRef<{ initialized: boolean; value?: Data }>({
+    initialized: false,
+  });
+  if (!initialDataRef.current.initialized) {
+    initialDataRef.current = {
+      initialized: true,
+      value: options.initial?.(),
+    };
+  }
 
-  const { error, loading, trigger } = useAsync(handler, {
+  const { data, error, loading, trigger } = useAsync<Data, Params, undefined>(handler, {
     concurrency: "latest",
+    initialData: initialDataRef.current.value,
+    getErrorData: () => initialRef.current?.(),
     onSuccess: (result) => {
-      setData(result);
       options.onSuccess?.(result);
     },
     onError: (caughtError) => {
-      setData(initialRef.current?.());
       options.onError?.(caughtError);
     },
   });
