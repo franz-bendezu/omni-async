@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./app/docs/.docs/omni-async-logo.svg" alt="Omni Async" width="160" height="160">
+  <img src="./apps/docs/.docs/public/icon.svg" alt="Omni Async" width="160" height="160">
 </p>
 
 <h1 align="center">Omni Async</h1>
