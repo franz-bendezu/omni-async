@@ -32,6 +32,13 @@ export function useAsync<
   options: AsyncOptions<Data, Empty> & { initialData: Data | Empty },
 ): AsyncResult<Data, Params, Empty>;
 
+/**
+ * Creates Svelte stores for an async handler with configurable concurrency and fallback data.
+ *
+ * @param handler - Async function invoked by `trigger`.
+ * @param options - Initial data, concurrency, equality, and lifecycle callbacks.
+ * @returns Data, error and loading stores together with a typed trigger function.
+ */
 export function useAsync<Data, Params extends unknown[] = []>(
   handler: QueryHandler<Data, Params>,
   options: AsyncOptions<Data, null | undefined> = {},
@@ -64,6 +71,13 @@ export type QueryOptions<Data> = {
   onError?: (error: unknown) => void;
 };
 
+/**
+ * Creates a latest-request-wins Svelte query for data that may be refreshed on demand.
+ *
+ * @param handler - Async query function invoked by `trigger`.
+ * @param options - Initial data and lifecycle callbacks.
+ * @returns Query stores and a typed trigger function.
+ */
 export function useQuery<Data, Params extends unknown[] = []>(
   handler: QueryHandler<Data, Params>,
   options: QueryOptions<Data> = {},
@@ -78,8 +92,16 @@ export function useQuery<Data, Params extends unknown[] = []>(
   });
 }
 
+/** Creates an on-demand async action using the same state contract as {@link useAsync}. */
 export const useAction = useAsync;
 
+/**
+ * Runs an abortable fetch on mount and exposes controls for refetching or cancellation.
+ *
+ * @param handler - Fetch function that receives an `AbortSignal`.
+ * @param options - Initial data and lifecycle callbacks.
+ * @returns Fetch stores together with `fetch` and `abort` controls.
+ */
 export function useFetch<Data>(
   handler: (signal: AbortSignal) => Promise<Data>,
   options: QueryOptions<Data> = {},
