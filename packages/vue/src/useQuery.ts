@@ -27,7 +27,7 @@ export function useQuery<Data, P extends unknown[] = []>(
   const result = useAsync<Data, P, undefined>(handler, {
     concurrency: "latest",
     initialData,
-    getErrorData: () => {
+    dataOnError: () => {
       const fallback = initial ? initial() : undefined;
       if (providedData) providedData.value = fallback;
       return fallback;

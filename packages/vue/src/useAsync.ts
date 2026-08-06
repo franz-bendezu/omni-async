@@ -9,7 +9,7 @@ export type AsyncOptions<Data, Empty extends null | undefined = null> = {
   onError?: (error: unknown) => void;
   concurrency?: "all" | "latest";
   initialData?: Data | Empty;
-  getErrorData?: (error: unknown) => Data | Empty;
+  dataOnError?: (error: unknown) => Data | Empty;
   isEqual?: (
     previous: Readonly<AsyncState<Data, null | undefined>>,
     next: Readonly<AsyncState<Data, null | undefined>>,
@@ -47,7 +47,7 @@ export function useAsync<Data, P extends unknown[] = []>(
 ): AsyncResult<Data, P, null | undefined> {
   const {
     concurrency = "all",
-    getErrorData,
+    dataOnError,
     initialData,
     isEqual,
     onError,
@@ -55,7 +55,7 @@ export function useAsync<Data, P extends unknown[] = []>(
   } = options;
   const operationOptions = {
     concurrency,
-    ...(getErrorData ? { getErrorData } : {}),
+    ...(dataOnError ? { dataOnError } : {}),
     ...(isEqual ? { isEqual } : {}),
     ...("initialData" in options ? { initialData } : {}),
     onError,

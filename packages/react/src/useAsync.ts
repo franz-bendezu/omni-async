@@ -8,7 +8,7 @@ export type AsyncOptions<Data, Empty extends null | undefined = null> = {
   onError?: (error: unknown) => void;
   concurrency?: "all" | "latest";
   initialData?: Data | Empty;
-  getErrorData?: (error: unknown) => Data | Empty;
+  dataOnError?: (error: unknown) => Data | Empty;
   isEqual?: (
     previous: Readonly<AsyncState<Data, null | undefined>>,
     next: Readonly<AsyncState<Data, null | undefined>>,
@@ -47,17 +47,17 @@ export function useAsync<Data, Params extends unknown[] = []>(
   const handlerRef = useRef(handler);
   const onSuccessRef = useRef(options.onSuccess);
   const onErrorRef = useRef(options.onError);
-  const getErrorDataRef = useRef(options.getErrorData);
+  const dataOnErrorRef = useRef(options.dataOnError);
   const isEqualRef = useRef(options.isEqual);
   handlerRef.current = handler;
   onSuccessRef.current = options.onSuccess;
   onErrorRef.current = options.onError;
-  getErrorDataRef.current = options.getErrorData;
+  dataOnErrorRef.current = options.dataOnError;
   isEqualRef.current = options.isEqual;
 
   const concurrency = options.concurrency ?? "all";
   const hasInitialData = "initialData" in options;
-  const hasErrorData = options.getErrorData !== undefined;
+  const hasErrorData = options.dataOnError !== undefined;
   const hasCustomEquality = options.isEqual !== undefined;
   const operation = useMemo(
     () => {
@@ -66,8 +66,8 @@ export function useAsync<Data, Params extends unknown[] = []>(
         ...(hasInitialData ? { initialData: options.initialData } : {}),
         ...(hasErrorData
           ? {
-              getErrorData: (error: unknown) =>
-                getErrorDataRef.current?.(error),
+              dataOnError: (error: unknown) =>
+                dataOnErrorRef.current?.(error),
             }
           : {}),
         onSuccess: (data: Data) => onSuccessRef.current?.(data),

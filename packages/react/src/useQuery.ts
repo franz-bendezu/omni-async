@@ -37,7 +37,7 @@ export function useQuery<Data, Params extends unknown[] = []>(
   const { data, error, loading, trigger } = useAsync<Data, Params, undefined>(handler, {
     concurrency: "latest",
     initialData: initialDataRef.current.value,
-    getErrorData: () => initialRef.current?.(),
+    dataOnError: () => initialRef.current?.(),
     onSuccess: (result) => {
       options.onSuccess?.(result);
     },

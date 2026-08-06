@@ -22,7 +22,7 @@ export type AsyncOptions<
   Empty extends null | undefined = null,
 > = {
   initialData?: Data | Empty;
-  getErrorData?: (error: unknown) => Data | Empty;
+  dataOnError?: (error: unknown) => Data | Empty;
   concurrency?: "all" | "latest";
   abortable?: boolean;
   isEqual?: (
@@ -85,7 +85,7 @@ export function createAsync<Data, Params extends unknown[] = []>(
   const {
     abortable = false,
     concurrency = "all",
-    getErrorData,
+    dataOnError,
     isEqual = isAsyncStateEqual,
     onError,
     onSuccess,
@@ -178,7 +178,7 @@ export function createAsync<Data, Params extends unknown[] = []>(
         updateState({
           ...state,
           status: "error",
-          data: getErrorData ? getErrorData(error) : state.data,
+          data: dataOnError ? dataOnError(error) : state.data,
           error,
           isLoading: isStillLoading(),
         });
