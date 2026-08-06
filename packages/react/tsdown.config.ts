@@ -8,4 +8,8 @@ export default defineConfig({
   deps: {
     neverBundle: ["react"],
   },
+  exports: {
+    legacy: true,
+    packageJson: true,
+  },
 });

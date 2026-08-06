@@ -44,6 +44,21 @@ importers:
 
   packages/core: {}
 
+  packages/omni-async:
+    dependencies:
+      '@omni-async/core':
+        specifier: workspace:*
+        version: link:../core
+      '@omni-async/react':
+        specifier: workspace:*
+        version: link:../react
+      '@omni-async/svelte':
+        specifier: workspace:*
+        version: link:../svelte
+      '@omni-async/vue':
+        specifier: workspace:*
+        version: link:../vue
+
   packages/react:
     dependencies:
       '@omni-async/core':

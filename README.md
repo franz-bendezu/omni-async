@@ -22,6 +22,7 @@ Omni Async centralizes request lifecycle, concurrency, cancellation, and notific
 
 | Package                                   | Description                                     |
 | ----------------------------------------- | ----------------------------------------------- |
+| [`omni-async`](./packages/omni-async)     | Unified package with framework subpath exports  |
 | [`@omni-async/core`](./packages/core)     | Dependency-free async operations for TypeScript |
 | [`@omni-async/react`](./packages/react)   | React hooks using `useSyncExternalStore`        |
 | [`@omni-async/vue`](./packages/vue)       | Vue composables using refs and computed state   |
@@ -31,7 +32,13 @@ All packages use one shared version.
 
 ## Quick start
 
-Install the package for your runtime:
+Choose the unified package for one dependency and consistent subpath imports:
+
+```bash
+pnpm add omni-async
+```
+
+Or install only the standalone package for your runtime:
 
 ```bash
 pnpm add @omni-async/core
@@ -41,7 +48,9 @@ pnpm add @omni-async/core
 Create a framework-independent operation:
 
 ```ts
-import { createAsync } from "@omni-async/core";
+import { createAsync } from "omni-async";
+// Explicit equivalent: import { createAsync } from "omni-async/core";
+// Standalone equivalent: import { createAsync } from "@omni-async/core";
 
 const user = createAsync(
   async ({ signal }, id: string) => {
@@ -62,7 +71,8 @@ await user.execute("42");
 Or use a framework adapter:
 
 ```tsx
-import { useQuery } from "@omni-async/react";
+import { useQuery } from "omni-async/react";
+// Standalone equivalent: import { useQuery } from "@omni-async/react";
 
 const user = useQuery((id: string) =>
   fetch(`/api/users/${id}`).then((response) => response.json()),

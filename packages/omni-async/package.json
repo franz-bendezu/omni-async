@@ -1,8 +1,8 @@
 {
-  "name": "@omni-async/vue",
+  "name": "omni-async",
   "version": "0.1.0",
-  "description": "Typed Vue composables for asynchronous queries, fetches, and actions.",
-  "homepage": "https://franz-bendezu.github.io/omni-async/frameworks/vue",
+  "description": "Framework-agnostic async state primitives with adapters for React, Vue, and Svelte.",
+  "homepage": "https://franz-bendezu.github.io/omni-async",
   "bugs": {
     "url": "https://github.com/franz-bendezu/omni-async/issues"
   },
@@ -10,7 +10,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/franz-bendezu/omni-async.git",
-    "directory": "packages/vue"
+    "directory": "packages/omni-async"
   },
   "files": [
     "dist"
@@ -22,7 +22,11 @@
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
-    "./package.json": "./package.json"
+    "./react": "./dist/react.mjs",
+    "./svelte": "./dist/svelte.mjs",
+    "./vue": "./dist/vue.mjs",
+    "./package.json": "./package.json",
+    "./core": "./dist/index.mjs"
   },
   "publishConfig": {
     "access": "public"
@@ -31,17 +35,13 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@omni-async/core": "workspace:*"
-  },
-  "devDependencies": {
-    "@vue/test-utils": "^2.4.11",
-    "vue": "^3.5.40"
-  },
-  "peerDependencies": {
-    "vue": "^3.5.0"
+    "@omni-async/core": "workspace:*",
+    "@omni-async/react": "workspace:*",
+    "@omni-async/svelte": "workspace:*",
+    "@omni-async/vue": "workspace:*"
   }
 }

@@ -8,4 +8,8 @@ export default defineConfig({
   deps: {
     neverBundle: ["svelte"],
   },
+  exports: {
+    legacy: true,
+    packageJson: true,
+  },
 });

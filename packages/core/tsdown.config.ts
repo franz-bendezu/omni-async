@@ -5,4 +5,8 @@ export default defineConfig({
   clean: true,
   dts: true,
   format: ["esm"],
+  exports: {
+    legacy: true,
+    packageJson: true,
+  },
 });
