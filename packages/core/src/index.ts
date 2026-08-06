@@ -78,11 +78,15 @@ export function createAsync<Data, Params extends unknown[] = []>(
     !request.cancelled &&
     (concurrency === "all" || request.requestId === latestRequestId);
 
-  const hasActiveRequests = () =>
-    [...activeRequests].some(
-      (request) =>
-        request.generationId === generationId && !request.cancelled,
-    );
+  const hasActiveRequests = () => {
+    for (const request of activeRequests) {
+      if (request.generationId === generationId && !request.cancelled) {
+        return true;
+      }
+    }
+
+    return false;
+  };
 
   const invalidateActiveRequests = () => {
     for (const request of activeRequests) {
