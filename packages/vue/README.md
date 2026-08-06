@@ -8,7 +8,7 @@ Typed Vue composables for asynchronous queries, fetches, and actions.
 pnpm add @omni-async/vue
 ```
 
-Vue 3.5 and newer are supported.
+Vue 3.2 and newer are supported.
 
 ## Query
 
