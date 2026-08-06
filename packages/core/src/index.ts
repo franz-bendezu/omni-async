@@ -119,6 +119,13 @@ export function createAsync<
   options: AsyncOptions<Data, Empty> & { initialData: Data | Empty },
 ): AsyncOperation<Data, Params, Empty>;
 
+/**
+ * Creates an observable async operation with explicit concurrency, cancellation, and lifecycle state.
+ *
+ * @param handler - Async function executed for every request.
+ * @param options - Initial state, concurrency, cancellation, and lifecycle options.
+ * @returns A stateful operation that can be executed, observed, aborted, and reset.
+ */
 export function createAsync<Data, Params extends unknown[] = []>(
   handler: AsyncHandler<Data, Params>,
   options: AsyncOptions<Data, null | undefined> = {},
