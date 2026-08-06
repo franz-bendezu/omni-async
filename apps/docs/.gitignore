@@ -1,2 +1,5 @@
-.docs
+.docs/*
+!.docs/components/
+.docs/components/*
+!.docs/components/LandingBackground.vue
 dist

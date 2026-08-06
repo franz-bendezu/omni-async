@@ -7,6 +7,32 @@ github: franz-bendezu/omni-async
 branch: main
 themeColor: cyan
 automd: true
+landing:
+  heroTitle: Omni Async
+  heroSubtitle: Async state, once.
+  heroDescription: A small, typed async state engine with native adapters for React, Vue, and Svelte.
+  heroLinks:
+    primary:
+      label: Get started
+      icon: i-lucide-rocket
+      to: /guide/quick-start
+    github:
+      label: View on GitHub
+      icon: i-simple-icons-github
+      color: neutral
+      variant: outline
+      to: https://github.com/franz-bendezu/omni-async
+  featuresTitle: One async model, every framework
+  features:
+    - title: Framework independent
+      icon: i-lucide-boxes
+      description: Keep behavior in `@omni-async/core`, then use the same model through React, Vue, or Svelte.
+    - title: Concurrency you control
+      icon: i-lucide-git-branch
+      description: Choose whether every request completes or only the latest request can update state.
+    - title: Typed end to end
+      icon: i-lucide-braces
+      description: Carry handler parameters, results, errors, and state through a compact TypeScript API.
 llms:
   domain: https://franz-bendezu.github.io/omni-async
   title: Omni Async Documentation
