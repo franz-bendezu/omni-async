@@ -1,4 +1,4 @@
-import { getCurrentScope, onScopeDispose, shallowRef } from "vue";
+import { computed, getCurrentScope, onScopeDispose, shallowRef } from "vue";
 import type { Ref } from "vue";
 import { createAsync } from "@omni-async/core";
 import type { QueryHandler, TriggerHandler } from "./types";
@@ -20,17 +20,16 @@ export function useAsync<Data, P extends unknown[] = []>(
   options: AsyncOptions<Data> = {},
 ): AsyncResult<Data, P> {
   const { concurrency = "all", onError, onSuccess } = options;
-  const error = shallowRef<unknown | null>(null);
-  const loading = shallowRef(false);
   const operation = createAsync(
     async (_context, ...params: P) => handler(...params),
     { concurrency, onError, onSuccess },
   );
+  const state = shallowRef(operation.getSnapshot());
+  const error = computed(() => state.value.error);
+  const loading = computed(() => state.value.isLoading);
 
   const updateState = () => {
-    const state = operation.getSnapshot();
-    error.value = state.error;
-    loading.value = state.isLoading;
+    state.value = operation.getSnapshot();
   };
   const unsubscribe = operation.subscribe(updateState);
 
