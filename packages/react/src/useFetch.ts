@@ -18,6 +18,13 @@ export function useFetch<Data>(
   options?: QueryOptions<Data>,
 ): FetchResult<Data, undefined>;
 
+/**
+ * Runs an abortable fetch on mount and exposes controls for refetching or cancellation.
+ *
+ * @param handler - Fetch function that receives an `AbortSignal`.
+ * @param options - Initial data and lifecycle callbacks.
+ * @returns Fetch state together with `fetch` and `abort` controls.
+ */
 export function useFetch<Data>(
   handler: FetchHandler<Data>,
   options?: QueryOptions<Data>,
