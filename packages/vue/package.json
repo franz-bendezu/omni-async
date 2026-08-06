@@ -4,7 +4,9 @@
   "description": "Typed Vue composables for asynchronous queries, fetches, and actions.",
   "license": "MIT",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
@@ -29,5 +31,9 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@vue/test-utils": "^2.4.11",
+    "vue": "^3.5.40"
   }
 }

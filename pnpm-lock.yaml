@@ -8,9 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@vue/test-utils':
-        specifier: ^2.4.6
-        version: 2.4.11(@vue/compiler-dom@3.5.40)(@vue/server-renderer@3.5.40)(vue@3.5.40(typescript@5.9.3))
       jsdom:
         specifier: ^29.0.0
         version: 29.1.1
@@ -26,9 +23,6 @@ importers:
       vitest:
         specifier: 4.1.10
         version: 4.1.10(jsdom@29.1.1)(vite@8.2.0(esbuild@0.28.1)(tsx@4.23.8))
-      vue:
-        specifier: ^3.5.32
-        version: 3.5.40(typescript@5.9.3)
 
   packages/core: {}
 
@@ -59,8 +53,12 @@ importers:
       '@omni-async/core':
         specifier: workspace:*
         version: link:../core
+    devDependencies:
+      '@vue/test-utils':
+        specifier: ^2.4.11
+        version: 2.4.11(@vue/compiler-dom@3.5.40)(@vue/server-renderer@3.5.40)(vue@3.5.40(typescript@5.9.3))
       vue:
-        specifier: ^3.5.0
+        specifier: ^3.5.40
         version: 3.5.40(typescript@5.9.3)
 
 packages:
