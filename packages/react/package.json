@@ -1,6 +1,6 @@
 {
   "name": "@omni-async/react",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Typed React hooks for asynchronous queries, fetches, and actions.",
   "homepage": "https://github.com/franz-bendezu/omni-async#readme",
   "bugs": {

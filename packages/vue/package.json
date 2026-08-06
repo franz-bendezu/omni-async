@@ -1,6 +1,6 @@
 {
   "name": "@omni-async/vue",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Typed Vue composables for asynchronous queries, fetches, and actions.",
   "homepage": "https://github.com/franz-bendezu/omni-async#readme",
   "bugs": {
