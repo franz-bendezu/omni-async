@@ -16,11 +16,7 @@ export type AsyncOptions<Data, Empty extends null | undefined = null> = {
   ) => boolean;
 };
 
-export type AsyncResult<
-  Data,
-  P extends unknown[],
-  Empty extends null | undefined = null,
-> = {
+export type AsyncResult<Data, P extends unknown[], Empty extends null | undefined = null> = {
   data: Ref<Data | Empty>;
   error: Ref<unknown | null>;
   loading: Ref<boolean>;
@@ -32,11 +28,7 @@ export function useAsync<Data, P extends unknown[] = []>(
   options?: AsyncOptions<Data, null>,
 ): AsyncResult<Data, P, null>;
 
-export function useAsync<
-  Data,
-  P extends unknown[] = [],
-  Empty extends null | undefined = null,
->(
+export function useAsync<Data, P extends unknown[] = [], Empty extends null | undefined = null>(
   handler: QueryHandler<Data, P>,
   options: AsyncOptions<Data, Empty> & { initialData: Data | Empty },
 ): AsyncResult<Data, P, Empty>;
@@ -45,14 +37,7 @@ export function useAsync<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
   options: AsyncOptions<Data, null | undefined> = {},
 ): AsyncResult<Data, P, null | undefined> {
-  const {
-    concurrency = "all",
-    dataOnError,
-    initialData,
-    isEqual,
-    onError,
-    onSuccess,
-  } = options;
+  const { concurrency = "all", dataOnError, initialData, isEqual, onError, onSuccess } = options;
   const operationOptions = {
     concurrency,
     ...(dataOnError ? { dataOnError } : {}),
@@ -85,8 +70,7 @@ export function useAsync<Data, P extends unknown[] = []>(
     });
   }
 
-  const trigger: TriggerHandler<Data, P> = (...params) =>
-    operation.execute(...params);
+  const trigger: TriggerHandler<Data, P> = (...params) => operation.execute(...params);
 
   return { data, error, loading, trigger };
 }

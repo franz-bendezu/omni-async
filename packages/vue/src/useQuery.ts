@@ -32,9 +32,9 @@ export function useQuery<Data, P extends unknown[] = []>(
       if (providedData) providedData.value = fallback;
       return fallback;
     },
-    onSuccess: (result) => {
-      if (providedData) providedData.value = result;
-      onSuccess?.(result);
+    onSuccess: (queryData) => {
+      if (providedData) providedData.value = queryData;
+      onSuccess?.(queryData);
     },
     onError: (caughtError) => {
       onError?.(caughtError);

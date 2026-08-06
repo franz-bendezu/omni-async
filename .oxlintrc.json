@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "plugins": ["typescript", "unicorn", "oxc"],
+  "ignorePatterns": ["**/dist/**", "**/.turbo/**", "**/coverage/**"],
+  "overrides": [
+    {
+      "files": ["**/tests/**"],
+      "rules": {
+        "unicorn/consistent-function-scoping": "off"
+      }
+    }
+  ]
+}

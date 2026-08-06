@@ -8,9 +8,7 @@ describe("useQuery", () => {
       .fn<() => Promise<string>>()
       .mockResolvedValueOnce("loaded")
       .mockRejectedValueOnce(new Error("failed"));
-    const { result } = renderHook(() =>
-      useQuery(handler, { initial: () => "initial" }),
-    );
+    const { result } = renderHook(() => useQuery(handler, { initial: () => "initial" }));
 
     expect(result.current.data).toBe("initial");
     await act(async () => {

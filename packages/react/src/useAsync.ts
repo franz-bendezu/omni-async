@@ -15,11 +15,7 @@ export type AsyncOptions<Data, Empty extends null | undefined = null> = {
   ) => boolean;
 };
 
-export type AsyncResult<
-  Data,
-  Params extends unknown[],
-  Empty extends null | undefined = null,
-> = {
+export type AsyncResult<Data, Params extends unknown[], Empty extends null | undefined = null> = {
   data: Data | Empty;
   error: unknown | null;
   loading: boolean;
@@ -59,39 +55,34 @@ export function useAsync<Data, Params extends unknown[] = []>(
   const hasInitialData = "initialData" in options;
   const hasErrorData = options.dataOnError !== undefined;
   const hasCustomEquality = options.isEqual !== undefined;
-  const operation = useMemo(
-    () => {
-      const operationOptions = {
-        concurrency,
-        ...(hasInitialData ? { initialData: options.initialData } : {}),
-        ...(hasErrorData
-          ? {
-              dataOnError: (error: unknown) =>
-                dataOnErrorRef.current?.(error),
-            }
-          : {}),
-        onSuccess: (data: Data) => onSuccessRef.current?.(data),
-        onError: (error: unknown) => onErrorRef.current?.(error),
-        ...(hasCustomEquality
-          ? {
-              isEqual: (
-                previous: Readonly<AsyncState<Data, null | undefined>>,
-                next: Readonly<AsyncState<Data, null | undefined>>,
-              ) => isEqualRef.current?.(previous, next) ?? false,
-            }
-          : {}),
-      };
-      return createAsync<Data, Params, null | undefined>(
-        async (_context, ...params: Params) => handlerRef.current(...params),
-        {
-          ...operationOptions,
-          initialData:
-            "initialData" in options ? options.initialData : null,
-        },
-      );
-    },
-    [concurrency, hasCustomEquality, hasErrorData, hasInitialData],
-  );
+  const operation = useMemo(() => {
+    const operationOptions = {
+      concurrency,
+      ...(hasInitialData ? { initialData: options.initialData } : {}),
+      ...(hasErrorData
+        ? {
+            dataOnError: (error: unknown) => dataOnErrorRef.current?.(error),
+          }
+        : {}),
+      onSuccess: (data: Data) => onSuccessRef.current?.(data),
+      onError: (error: unknown) => onErrorRef.current?.(error),
+      ...(hasCustomEquality
+        ? {
+            isEqual: (
+              previous: Readonly<AsyncState<Data, null | undefined>>,
+              next: Readonly<AsyncState<Data, null | undefined>>,
+            ) => isEqualRef.current?.(previous, next) ?? false,
+          }
+        : {}),
+    };
+    return createAsync<Data, Params, null | undefined>(
+      async (_context, ...params: Params) => handlerRef.current(...params),
+      {
+        ...operationOptions,
+        initialData: "initialData" in options ? options.initialData : null,
+      },
+    );
+  }, [concurrency, hasCustomEquality, hasErrorData, hasInitialData]);
 
   const snapshot = useSyncExternalStore(
     operation.subscribe,
@@ -101,10 +92,7 @@ export function useAsync<Data, Params extends unknown[] = []>(
 
   useEffect(() => () => operation.abort(), [operation]);
 
-  const trigger = useCallback(
-    (...params: Params) => operation.execute(...params),
-    [operation],
-  );
+  const trigger = useCallback((...params: Params) => operation.execute(...params), [operation]);
 
   return {
     data: snapshot.data,

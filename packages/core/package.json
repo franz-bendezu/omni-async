@@ -3,8 +3,12 @@
   "version": "0.0.1",
   "description": "Framework-agnostic async state primitives for TypeScript.",
   "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "type": "module",
-  "files": ["dist"],
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
@@ -12,8 +16,9 @@
       "default": "./dist/index.mjs"
     }
   },
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
@@ -22,8 +27,5 @@
     "bench": "vitest bench --run --project=bench --outputJson=.bench/results-baseline.json",
     "bench-compare": "vitest bench --run --project=bench --compare=.bench/results-baseline.json",
     "clean": "rm -rf dist"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

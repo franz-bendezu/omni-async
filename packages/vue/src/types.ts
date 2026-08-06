@@ -4,9 +4,7 @@ export interface QueryHandler<Data, P extends unknown[]> {
   (...args: P): Promise<Data>;
 }
 
-export type MaybeData<Initializer, Data> = Initializer extends undefined
-  ? Data | undefined
-  : Data;
+export type MaybeData<Initializer, Data> = Initializer extends undefined ? Data | undefined : Data;
 
 export type DataInitializer<Data> = () => Data;
 

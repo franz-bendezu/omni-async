@@ -2,11 +2,14 @@
   "name": "omni-async",
   "version": "0.0.0",
   "private": true,
-  "packageManager": "pnpm@11.20.0",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
     "test": "turbo run test",
+    "lint": "oxlint . --deny-warnings",
+    "lint:fix": "oxlint . --fix",
+    "format": "oxfmt .",
+    "format:check": "oxfmt . --check",
     "bench": "turbo run bench",
     "bench-compare": "turbo run bench-compare",
     "typecheck": "turbo run typecheck",
@@ -14,9 +17,12 @@
   },
   "devDependencies": {
     "jsdom": "^29.0.0",
+    "oxfmt": "^0.62.0",
+    "oxlint": "^1.77.0",
     "tsdown": "^0.22.14",
     "turbo": "^2.10.8",
     "typescript": "^5.9.3",
     "vitest": "4.1.10"
-  }
+  },
+  "packageManager": "pnpm@11.20.0"
 }

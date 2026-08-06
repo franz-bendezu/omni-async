@@ -3,10 +3,12 @@
   "version": "0.0.1",
   "description": "Typed Vue composables for asynchronous queries, fetches, and actions.",
   "license": "MIT",
-  "type": "module",
   "files": [
     "dist"
   ],
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
@@ -14,8 +16,9 @@
       "default": "./dist/index.mjs"
     }
   },
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
@@ -23,17 +26,14 @@
     "test": "vitest run",
     "clean": "rm -rf dist"
   },
-  "peerDependencies": {
-    "vue": "^3.5.0"
-  },
   "dependencies": {
     "@omni-async/core": "workspace:*"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "devDependencies": {
     "@vue/test-utils": "^2.4.11",
     "vue": "^3.5.40"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
   }
 }

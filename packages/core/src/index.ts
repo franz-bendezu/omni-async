@@ -17,10 +17,7 @@ export type AsyncHandler<Data, Params extends unknown[] = []> = (
   ...params: Params
 ) => Promise<Data>;
 
-export type AsyncOptions<
-  Data,
-  Empty extends null | undefined = null,
-> = {
+export type AsyncOptions<Data, Empty extends null | undefined = null> = {
   initialData?: Data | Empty;
   dataOnError?: (error: unknown) => Data | Empty;
   concurrency?: "all" | "latest";
@@ -153,8 +150,7 @@ export function createAsync<Data, Params extends unknown[] = []>(
         activeRequestCount -= 1;
       }
     };
-    const isStillLoading = () =>
-      concurrency === "all" ? activeRequestCount > 0 : false;
+    const isStillLoading = () => (concurrency === "all" ? activeRequestCount > 0 : false);
 
     try {
       const data = await handler(

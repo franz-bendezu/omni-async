@@ -4,20 +4,14 @@ import { onDestroy, onMount } from "svelte";
 import { derived, readable } from "svelte/store";
 import type { Readable } from "svelte/store";
 
-export type QueryHandler<Data, Params extends unknown[]> = (
-  ...params: Params
-) => Promise<Data>;
+export type QueryHandler<Data, Params extends unknown[]> = (...params: Params) => Promise<Data>;
 
-export type AsyncOptions<
-  Data,
-  Empty extends null | undefined = null,
-> = Omit<CoreOptions<Data, Empty>, "abortable">;
+export type AsyncOptions<Data, Empty extends null | undefined = null> = Omit<
+  CoreOptions<Data, Empty>,
+  "abortable"
+>;
 
-export type AsyncResult<
-  Data,
-  Params extends unknown[],
-  Empty extends null | undefined = null,
-> = {
+export type AsyncResult<Data, Params extends unknown[], Empty extends null | undefined = null> = {
   data: Readable<Data | Empty>;
   error: Readable<unknown | null>;
   loading: Readable<boolean>;

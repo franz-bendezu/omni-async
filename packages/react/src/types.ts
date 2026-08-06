@@ -4,14 +4,9 @@ export interface QueryHandler<Data, Params extends unknown[]> {
 
 export type DataInitializer<Data> = () => Data;
 
-export type MaybeData<Initializer, Data> = Initializer extends undefined
-  ? Data | undefined
-  : Data;
+export type MaybeData<Initializer, Data> = Initializer extends undefined ? Data | undefined : Data;
 
-export type TriggerHandler<Data, Params extends unknown[]> = QueryHandler<
-  Data,
-  Params
->;
+export type TriggerHandler<Data, Params extends unknown[]> = QueryHandler<Data, Params>;
 
 export type QueryOptions<Data> = {
   initial?: DataInitializer<Data>;
