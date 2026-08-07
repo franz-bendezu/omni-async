@@ -31,3 +31,41 @@ it("preserves a writable data ref supplied by the consumer", () => {
   query.data.value = "changed";
   fetchResult.data.value = "changed again";
 });
+
+it("infers defined data and handler parameters from an initializer", () => {
+  const query = useQuery(async (id: number) => ({ id }), {
+    initial: () => ({ id: 0 }),
+  });
+  const fetchResult = useFetch(async () => ({ id: 1 }), {
+    initial: () => ({ id: 0 }),
+  });
+
+  expectTypeOf(query.data).toEqualTypeOf<ComputedRef<{ id: number }>>();
+  expectTypeOf(query.trigger).parameter(0).toEqualTypeOf<number>();
+  expectTypeOf(query.trigger).returns.toEqualTypeOf<Promise<{ id: number }>>();
+  expectTypeOf(fetchResult.data).toEqualTypeOf<ComputedRef<{ id: number }>>();
+});
+
+it("preserves defined and optional external ref types", () => {
+  const definedData = ref<string[]>([]);
+  const optionalData = ref<string[]>();
+
+  const definedQuery = useQuery(async () => ["result"], { data: definedData });
+  const optionalQuery = useQuery(async () => ["result"], {
+    data: optionalData,
+    initial: () => [],
+  });
+
+  expectTypeOf(definedQuery.data).toEqualTypeOf(definedData);
+  expectTypeOf(definedQuery.data.value).toEqualTypeOf<string[]>();
+  expectTypeOf(optionalQuery.data).toEqualTypeOf(optionalData);
+  expectTypeOf(optionalQuery.data.value).toEqualTypeOf<string[] | undefined>();
+});
+
+it("rejects option data that does not match the handler result", () => {
+  // @ts-expect-error Initial data must match the handler's resolved value.
+  useQuery(async () => "result", { initial: () => 1 });
+
+  // @ts-expect-error External data must match the handler's resolved value.
+  useQuery(async () => "result", { data: ref(1) });
+});

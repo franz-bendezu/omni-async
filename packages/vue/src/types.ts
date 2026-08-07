@@ -4,8 +4,6 @@ export interface QueryHandler<Data, P extends unknown[]> {
   (...args: P): Promise<Data>;
 }
 
-export type MaybeData<Initializer, Data> = Initializer extends undefined ? Data | undefined : Data;
-
 export type DataInitializer<Data> = () => Data;
 
 export type TriggerHandler<Data, P extends unknown[]> = QueryHandler<Data, P>;
@@ -13,10 +11,7 @@ export type TriggerHandler<Data, P extends unknown[]> = QueryHandler<Data, P>;
 export interface IQueryResult<
   Data,
   P extends unknown[],
-  Initializer,
-  DataRef extends Readonly<Ref<MaybeData<Initializer, Data>>> = ComputedRef<
-    MaybeData<Initializer, Data>
-  >,
+  DataRef extends Readonly<Ref<unknown>> = ComputedRef<Data | undefined>,
 > {
   data: DataRef;
   error: ComputedRef<unknown | null>;

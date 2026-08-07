@@ -1,12 +1,11 @@
 import type {
-  DataInitializer,
   IQueryResult,
   QueryHandler,
   QueryOptions,
   QueryOptionsWithData,
   QueryOptionsWithInitial,
 } from "./types";
-import type { Ref } from "vue";
+import type { ComputedRef, Ref } from "vue";
 import { useAsync } from "./useAsync";
 
 export function useQuery<
@@ -16,17 +15,17 @@ export function useQuery<
 >(
   handler: QueryHandler<Data, P>,
   options: QueryOptionsWithData<Data, DataRef>,
-): IQueryResult<Data, P, undefined, DataRef>;
+): IQueryResult<Data, P, DataRef>;
 
 export function useQuery<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
   options: QueryOptionsWithInitial<Data>,
-): IQueryResult<Data, P, DataInitializer<Data>>;
+): IQueryResult<Data, P, ComputedRef<Data>>;
 
 export function useQuery<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
   options?: QueryOptions<Data>,
-): IQueryResult<Data, P, undefined>;
+): IQueryResult<Data, P>;
 
 /**
  * Creates a latest-request-wins Vue query that may optionally share an external data ref.
@@ -41,7 +40,7 @@ export function useQuery<Data, P extends unknown[] = []>(
 export function useQuery<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
   options?: QueryOptions<Data>,
-): IQueryResult<Data, P, DataInitializer<Data> | undefined, Readonly<Ref<Data | undefined>>> {
+): IQueryResult<Data, P, Readonly<Ref<Data | undefined>>> {
   const { initial, onError, onSuccess, data: providedData } = options || {};
   const initialData = providedData ? providedData.value : initial?.();
 
