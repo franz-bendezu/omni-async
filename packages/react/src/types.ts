@@ -1,3 +1,4 @@
+import type { AsyncConcurrency } from "@omni-async/core";
 export interface QueryHandler<Data, Params extends unknown[]> {
   (...args: Params): Promise<Data>;
 }
@@ -19,6 +20,7 @@ export type QueryOptionsWithInitial<Data> = QueryOptions<Data> & {
 };
 
 export type ActionOptions<Data> = {
+  concurrency?: AsyncConcurrency;
   onSuccess?: (data: Data) => void;
   onError?: (error: unknown) => void;
 };

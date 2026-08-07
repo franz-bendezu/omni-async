@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { createAsync } from "@omni-async/core";
-import type { AsyncState } from "@omni-async/core";
+import type { AsyncConcurrency, AsyncState } from "@omni-async/core";
 import type { QueryHandler, TriggerHandler } from "./types";
 
 export type AsyncOptions<Data, Empty extends null | undefined = null> = {
   onSuccess?: (data: Data) => void;
   onError?: (error: unknown) => void;
-  concurrency?: "all" | "latest";
+  concurrency?: AsyncConcurrency;
   initialData?: Data | Empty;
   dataOnError?: (error: unknown) => Data | Empty;
   isEqual?: (

@@ -1,6 +1,9 @@
 /** Lifecycle status of an asynchronous operation. */
 export type AsyncStatus = "idle" | "loading" | "success" | "error";
 
+/** Determines how overlapping executions are handled. */
+export type AsyncConcurrency = "all" | "latest" | "exhaust";
+
 /** Context supplied to an {@link AsyncHandler} for the current request. */
 export type AsyncContext = {
   /** Abort signal when `abortable` is enabled, otherwise `null`. */
@@ -33,8 +36,8 @@ export type AsyncOptions<Data, Empty extends null | undefined = null> = {
   initialData?: Data | Empty;
   /** Produces replacement data when a request rejects. Existing data is preserved by default. */
   dataOnError?: (error: unknown) => Data | Empty;
-  /** Controls whether all requests or only the latest request may update state. @defaultValue `"all"` */
-  concurrency?: "all" | "latest";
+  /** Controls how overlapping requests execute and update state. @defaultValue `"all"` */
+  concurrency?: AsyncConcurrency;
   /** Creates an `AbortController` for each request. @defaultValue `false` */
   abortable?: boolean;
   /** Determines whether a proposed state update should notify subscribers. */
@@ -147,6 +150,7 @@ export function createAsync<Data, Params extends unknown[] = []>(
   let activeRequestCount = 0;
   let generationId = 0;
   let latestRequestId = 0;
+  let activePromise: Promise<Data> | null = null;
   let state: Readonly<AsyncState<Data, null | undefined>> = Object.freeze({
     status: "idle",
     data: initialData,
@@ -177,9 +181,10 @@ export function createAsync<Data, Params extends unknown[] = []>(
       request.controller?.abort();
     }
     activeRequestCount = 0;
+    activePromise = null;
   };
 
-  const execute = async (...params: Params): Promise<Data> => {
+  const run = async (...params: Params): Promise<Data> => {
     const request: ActiveRequest = {
       generationId,
       requestId: ++latestRequestId,
@@ -238,6 +243,24 @@ export function createAsync<Data, Params extends unknown[] = []>(
     } finally {
       finishRequest();
     }
+  };
+
+  const execute = (...params: Params): Promise<Data> => {
+    if (concurrency === "exhaust" && activePromise) return activePromise;
+
+    const promise = run(...params);
+    if (concurrency === "exhaust") {
+      activePromise = promise;
+      void promise.then(
+        () => {
+          if (activePromise === promise) activePromise = null;
+        },
+        () => {
+          if (activePromise === promise) activePromise = null;
+        },
+      );
+    }
+    return promise;
   };
 
   const abort = () => {

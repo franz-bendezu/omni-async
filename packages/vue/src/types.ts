@@ -1,3 +1,4 @@
+import type { AsyncConcurrency } from "@omni-async/core";
 import type { Ref } from "vue";
 
 export interface QueryHandler<Data, P extends unknown[]> {
@@ -25,6 +26,7 @@ export type QueryOptions<T> = {
 };
 
 export type ActionOptions<T> = {
+  concurrency?: AsyncConcurrency;
   onSuccess?: (data: T) => void;
   onError?: (error: unknown) => void;
 };

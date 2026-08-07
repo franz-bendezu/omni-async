@@ -127,6 +127,53 @@ describe("createAsync", () => {
     expect(operation.getSnapshot().isLoading).toBe(false);
   });
 
+  it("reuses the active execution with exhaust concurrency", async () => {
+    let resolveRequest: (value: string) => void = () => {
+      throw new Error("Request was not initialized");
+    };
+    const onSuccess = vi.fn();
+    const handler = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveRequest = resolve;
+          }),
+      )
+      .mockResolvedValueOnce("next");
+    const operation = createAsync(handler, { concurrency: "exhaust", onSuccess });
+
+    const first = operation.execute();
+    const second = operation.execute();
+
+    expect(second).toBe(first);
+    expect(handler).toHaveBeenCalledOnce();
+    expect(operation.getSnapshot().isLoading).toBe(true);
+
+    resolveRequest("done");
+    await expect(Promise.all([first, second])).resolves.toEqual(["done", "done"]);
+    expect(operation.getSnapshot().isLoading).toBe(false);
+    expect(onSuccess).toHaveBeenCalledOnce();
+
+    await operation.execute();
+    expect(handler).toHaveBeenCalledTimes(2);
+  });
+
+  it("accepts a new exhaust execution after rejection", async () => {
+    const expectedError = new Error("failed");
+    const onError = vi.fn();
+    const handler = vi.fn().mockRejectedValueOnce(expectedError).mockResolvedValueOnce("recovered");
+    const operation = createAsync(handler, { concurrency: "exhaust", onError });
+
+    const first = operation.execute();
+    expect(operation.execute()).toBe(first);
+    await expect(first).rejects.toBe(expectedError);
+    await expect(operation.execute()).resolves.toBe("recovered");
+
+    expect(handler).toHaveBeenCalledTimes(2);
+    expect(onError).toHaveBeenCalledOnce();
+  });
+
   it("aborts every active handler", async () => {
     const handler = vi.fn(
       ({ signal }) =>
