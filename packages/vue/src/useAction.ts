@@ -1,10 +1,10 @@
-import type { Ref } from "vue";
+import type { ComputedRef } from "vue";
 import type { ActionOptions, QueryHandler, TriggerHandler } from "./types";
 import { useAsync } from "./useAsync";
 
 export interface ActionResult<Data, P extends unknown[]> {
-  error: Ref<unknown | null>;
-  loading: Ref<boolean>;
+  error: ComputedRef<unknown | null>;
+  loading: ComputedRef<boolean>;
   trigger: TriggerHandler<Data, P>;
 }
 
