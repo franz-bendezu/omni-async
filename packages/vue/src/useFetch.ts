@@ -4,17 +4,31 @@ import type {
   FetchHandler,
   FetchTriggerHandler,
   IQueryResult,
+  MaybeData,
   QueryOptions,
+  QueryOptionsWithData,
 } from "./types";
+import type { ComputedRef, Ref } from "vue";
 import { useQuery } from "./useQuery";
 
-interface IFetchResult<Data, Initializer> extends Omit<
-  IQueryResult<Data, [AbortSignal], Initializer>,
+interface IFetchResult<
+  Data,
+  Initializer,
+  DataRef extends Readonly<Ref<MaybeData<Initializer, Data>>> = ComputedRef<
+    MaybeData<Initializer, Data>
+  >,
+> extends Omit<
+  IQueryResult<Data, [AbortSignal], Initializer, DataRef>,
   "trigger"
 > {
   fetch: FetchTriggerHandler<Data>;
   abort: () => void;
 }
+
+export function useFetch<Data, DataRef extends Ref<Data | undefined>>(
+  handler: FetchHandler<Data>,
+  options: QueryOptionsWithData<Data, DataRef>,
+): IFetchResult<Data, undefined, DataRef>;
 
 export function useFetch<Data>(
   handler: FetchHandler<Data>,
@@ -39,7 +53,11 @@ export function useFetch<Data>(
 export function useFetch<Data>(
   handler: FetchHandler<Data>,
   options?: QueryOptions<Data>,
-): IFetchResult<Data, DataInitializer<Data> | undefined> {
+): IFetchResult<
+  Data,
+  DataInitializer<Data> | undefined,
+  Readonly<Ref<Data | undefined>>
+> {
   const { data, error, loading, trigger } = useQuery(handler, options);
   let controller: AbortController | undefined;
 

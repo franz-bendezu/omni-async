@@ -3,9 +3,20 @@ import type {
   IQueryResult,
   QueryHandler,
   QueryOptions,
+  QueryOptionsWithData,
   QueryOptionsWithInitial,
 } from "./types";
+import type { Ref } from "vue";
 import { useAsync } from "./useAsync";
+
+export function useQuery<
+  Data,
+  P extends unknown[] = [],
+  DataRef extends Ref<Data | undefined> = Ref<Data | undefined>,
+>(
+  handler: QueryHandler<Data, P>,
+  options: QueryOptionsWithData<Data, DataRef>,
+): IQueryResult<Data, P, undefined, DataRef>;
 
 export function useQuery<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
@@ -30,7 +41,12 @@ export function useQuery<Data, P extends unknown[] = []>(
 export function useQuery<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
   options?: QueryOptions<Data>,
-): IQueryResult<Data, P, DataInitializer<Data> | undefined> {
+): IQueryResult<
+  Data,
+  P,
+  DataInitializer<Data> | undefined,
+  Readonly<Ref<Data | undefined>>
+> {
   const { initial, onError, onSuccess, data: providedData } = options || {};
   const initialData = providedData ? providedData.value : initial?.();
 
