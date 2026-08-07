@@ -4,8 +4,6 @@ export interface QueryHandler<Data, Params extends unknown[]> {
 
 export type DataInitializer<Data> = () => Data;
 
-export type MaybeData<Initializer, Data> = Initializer extends undefined ? Data | undefined : Data;
-
 export type TriggerHandler<Data, Params extends unknown[]> = QueryHandler<Data, Params>;
 
 export type QueryOptions<Data> = {
@@ -23,8 +21,8 @@ export type ActionOptions<Data> = {
   onError?: (error: unknown) => void;
 };
 
-export type QueryResult<Data, Params extends unknown[], Initializer> = {
-  data: MaybeData<Initializer, Data>;
+export type QueryResult<Data, Params extends unknown[], Value = Data | undefined> = {
+  data: Value;
   error: unknown | null;
   loading: boolean;
   trigger: TriggerHandler<Data, Params>;
@@ -32,8 +30,8 @@ export type QueryResult<Data, Params extends unknown[], Initializer> = {
 
 export type FetchHandler<Data> = (signal: AbortSignal) => Promise<Data>;
 
-export type FetchResult<Data, Initializer> = Omit<
-  QueryResult<Data, [AbortSignal], Initializer>,
+export type FetchResult<Data, Value = Data | undefined> = Omit<
+  QueryResult<Data, [AbortSignal], Value>,
   "trigger"
 > & {
   fetch(): Promise<Data>;

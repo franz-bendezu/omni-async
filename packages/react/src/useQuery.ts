@@ -1,22 +1,16 @@
 import { useRef } from "react";
-import type {
-  DataInitializer,
-  QueryHandler,
-  QueryOptions,
-  QueryOptionsWithInitial,
-  QueryResult,
-} from "./types";
+import type { QueryHandler, QueryOptions, QueryOptionsWithInitial, QueryResult } from "./types";
 import { useAsync } from "./useAsync";
 
 export function useQuery<Data, Params extends unknown[] = []>(
   handler: QueryHandler<Data, Params>,
   options: QueryOptionsWithInitial<Data>,
-): QueryResult<Data, Params, DataInitializer<Data>>;
+): QueryResult<Data, Params, Data>;
 
 export function useQuery<Data, Params extends unknown[] = []>(
   handler: QueryHandler<Data, Params>,
   options?: QueryOptions<Data>,
-): QueryResult<Data, Params, undefined>;
+): QueryResult<Data, Params>;
 
 /**
  * Creates a latest-request-wins query for data that may be refreshed on demand.
@@ -31,7 +25,7 @@ export function useQuery<Data, Params extends unknown[] = []>(
 export function useQuery<Data, Params extends unknown[] = []>(
   handler: QueryHandler<Data, Params>,
   options: QueryOptions<Data> = {},
-): QueryResult<Data, Params, DataInitializer<Data> | undefined> {
+): QueryResult<Data, Params, Data | undefined> {
   const initialDataRef = useRef<{ initialized: boolean; value?: Data }>({
     initialized: false,
   });
