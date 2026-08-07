@@ -6,6 +6,10 @@ import type { Readable } from "svelte/store";
 
 export type QueryHandler<Data, Params extends unknown[]> = (...params: Params) => Promise<Data>;
 
+export type DataInitializer<Data> = () => Data;
+
+export type TriggerHandler<Data, Params extends unknown[]> = QueryHandler<Data, Params>;
+
 export type AsyncOptions<Data, Empty extends null | undefined = null> = Omit<
   CoreOptions<Data, Empty>,
   "abortable"
@@ -69,10 +73,31 @@ export function useAsync<Data, Params extends unknown[] = []>(
 }
 
 export type QueryOptions<Data> = {
-  initial?: () => Data;
+  initial?: DataInitializer<Data>;
   onSuccess?: (data: Data) => void;
   onError?: (error: unknown) => void;
 };
+
+export type QueryOptionsWithInitial<Data> = QueryOptions<Data> & {
+  initial: DataInitializer<Data>;
+};
+
+export type QueryResult<Data, Params extends unknown[], Value = Data | undefined> = {
+  data: Readable<Value>;
+  error: Readable<unknown | null>;
+  loading: Readable<boolean>;
+  trigger: TriggerHandler<Data, Params>;
+};
+
+export function useQuery<Data, Params extends unknown[] = []>(
+  handler: QueryHandler<Data, Params>,
+  options: QueryOptionsWithInitial<Data>,
+): QueryResult<Data, Params, Data>;
+
+export function useQuery<Data, Params extends unknown[] = []>(
+  handler: QueryHandler<Data, Params>,
+  options?: QueryOptions<Data>,
+): QueryResult<Data, Params>;
 
 /**
  * Creates a latest-request-wins Svelte query for data that may be refreshed on demand.
@@ -87,12 +112,11 @@ export type QueryOptions<Data> = {
 export function useQuery<Data, Params extends unknown[] = []>(
   handler: QueryHandler<Data, Params>,
   options: QueryOptions<Data> = {},
-) {
+): QueryResult<Data, Params, Data | undefined> {
   const initialData = options.initial?.();
   return useAsync<Data, Params, undefined>(handler, {
     concurrency: "latest",
     initialData,
-    dataOnError: () => options.initial?.(),
     onSuccess: options.onSuccess,
     onError: options.onError,
   });
@@ -132,6 +156,14 @@ export function useAction<Data, Params extends unknown[] = []>(
   });
 }
 
+export type FetchResult<Data, Value = Data | undefined> = Omit<
+  QueryResult<Data, [AbortSignal], Value>,
+  "trigger"
+> & {
+  fetch(): Promise<Data>;
+  abort(): void;
+};
+
 /**
  * Runs an abortable fetch on mount and exposes controls for refetching or cancellation.
  *
@@ -144,8 +176,18 @@ export function useAction<Data, Params extends unknown[] = []>(
  */
 export function useFetch<Data>(
   handler: (signal: AbortSignal) => Promise<Data>,
+  options: QueryOptionsWithInitial<Data>,
+): FetchResult<Data, Data>;
+
+export function useFetch<Data>(
+  handler: (signal: AbortSignal) => Promise<Data>,
+  options?: QueryOptions<Data>,
+): FetchResult<Data>;
+
+export function useFetch<Data>(
+  handler: (signal: AbortSignal) => Promise<Data>,
   options: QueryOptions<Data> = {},
-) {
+): FetchResult<Data, Data | undefined> {
   const query = useQuery(handler, options);
   let controller: AbortController | undefined;
   const abort = () => controller?.abort();

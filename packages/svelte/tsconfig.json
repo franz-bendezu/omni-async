@@ -8,5 +8,5 @@
     "declarationMap": true,
     "skipLibCheck": true
   },
-  "include": ["src", "tsdown.config.ts"]
+  "include": ["src", "type-tests", "tsdown.config.ts"]
 }

@@ -5,26 +5,33 @@ import type {
   FetchTriggerHandler,
   IQueryResult,
   QueryOptions,
+  QueryOptionsWithData,
 } from "./types";
+import type { ComputedRef, Ref } from "vue";
 import { useQuery } from "./useQuery";
 
-interface IFetchResult<Data, Initializer> extends Omit<
-  IQueryResult<Data, [AbortSignal], Initializer>,
-  "trigger"
-> {
+interface IFetchResult<
+  Data,
+  DataRef extends Readonly<Ref<unknown>> = ComputedRef<Data | undefined>,
+> extends Omit<IQueryResult<Data, [AbortSignal], DataRef>, "trigger"> {
   fetch: FetchTriggerHandler<Data>;
   abort: () => void;
 }
 
+export function useFetch<Data, DataRef extends Ref<Data | undefined>>(
+  handler: FetchHandler<Data>,
+  options: QueryOptionsWithData<Data, DataRef>,
+): IFetchResult<Data, DataRef>;
+
 export function useFetch<Data>(
   handler: FetchHandler<Data>,
   options: QueryOptions<Data> & { initial: DataInitializer<Data> },
-): IFetchResult<Data, DataInitializer<Data>>;
+): IFetchResult<Data, ComputedRef<Data>>;
 
 export function useFetch<Data>(
   handler: FetchHandler<Data>,
   options?: QueryOptions<Data>,
-): IFetchResult<Data, undefined>;
+): IFetchResult<Data>;
 
 /**
  * Runs an abortable fetch when the component mounts and cancels it on unmount.
@@ -39,7 +46,7 @@ export function useFetch<Data>(
 export function useFetch<Data>(
   handler: FetchHandler<Data>,
   options?: QueryOptions<Data>,
-): IFetchResult<Data, DataInitializer<Data> | undefined> {
+): IFetchResult<Data, Readonly<Ref<Data | undefined>>> {
   const { data, error, loading, trigger } = useQuery(handler, options);
   let controller: AbortController | undefined;
 

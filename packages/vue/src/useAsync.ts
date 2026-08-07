@@ -1,5 +1,5 @@
 import { computed, getCurrentScope, onScopeDispose, shallowRef } from "vue";
-import type { Ref } from "vue";
+import type { ComputedRef } from "vue";
 import { createAsync } from "@omni-async/core";
 import type { AsyncState } from "@omni-async/core";
 import type { QueryHandler, TriggerHandler } from "./types";
@@ -17,9 +17,9 @@ export type AsyncOptions<Data, Empty extends null | undefined = null> = {
 };
 
 export type AsyncResult<Data, P extends unknown[], Empty extends null | undefined = null> = {
-  data: Ref<Data | Empty>;
-  error: Ref<unknown | null>;
-  loading: Ref<boolean>;
+  data: ComputedRef<Data | Empty>;
+  error: ComputedRef<unknown | null>;
+  loading: ComputedRef<boolean>;
   trigger: TriggerHandler<Data, P>;
 };
 

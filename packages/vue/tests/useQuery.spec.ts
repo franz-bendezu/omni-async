@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { shallowRef } from "vue";
 import { useQuery } from "../src";
 
 describe("useQuery", () => {
@@ -56,5 +57,29 @@ describe("useQuery", () => {
     await trigger();
 
     expect(error.value).toBeNull();
+  });
+
+  it("preserves the latest data when a refresh fails", async () => {
+    const handler = vi
+      .fn()
+      .mockResolvedValueOnce(["latest"])
+      .mockRejectedValueOnce(new Error("refresh failed"));
+    const { data, trigger } = useQuery(handler, { initial: () => ["initial"] });
+
+    await trigger();
+    await expect(trigger()).rejects.toThrow("refresh failed");
+
+    expect(data.value).toEqual(["latest"]);
+  });
+
+  it("preserves provided data when a request fails", async () => {
+    const data = shallowRef(["existing"]);
+    const handler = vi.fn().mockRejectedValue(new Error("failed"));
+    const query = useQuery(handler, { data });
+
+    await expect(query.trigger()).rejects.toThrow("failed");
+
+    expect(data.value).toEqual(["existing"]);
+    expect(query.data).toBe(data);
   });
 });
