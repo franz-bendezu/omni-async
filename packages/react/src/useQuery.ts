@@ -32,8 +32,6 @@ export function useQuery<Data, Params extends unknown[] = []>(
   handler: QueryHandler<Data, Params>,
   options: QueryOptions<Data> = {},
 ): QueryResult<Data, Params, DataInitializer<Data> | undefined> {
-  const initialRef = useRef(options.initial);
-  initialRef.current = options.initial;
   const initialDataRef = useRef<{ initialized: boolean; value?: Data }>({
     initialized: false,
   });
@@ -47,7 +45,6 @@ export function useQuery<Data, Params extends unknown[] = []>(
   const { data, error, loading, trigger } = useAsync<Data, Params, undefined>(handler, {
     concurrency: "latest",
     initialData: initialDataRef.current.value,
-    dataOnError: () => initialRef.current?.(),
     onSuccess: (result) => {
       options.onSuccess?.(result);
     },

@@ -41,23 +41,13 @@ export function useQuery<Data, P extends unknown[] = []>(
 export function useQuery<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
   options?: QueryOptions<Data>,
-): IQueryResult<
-  Data,
-  P,
-  DataInitializer<Data> | undefined,
-  Readonly<Ref<Data | undefined>>
-> {
+): IQueryResult<Data, P, DataInitializer<Data> | undefined, Readonly<Ref<Data | undefined>>> {
   const { initial, onError, onSuccess, data: providedData } = options || {};
   const initialData = providedData ? providedData.value : initial?.();
 
   const result = useAsync<Data, P, undefined>(handler, {
     concurrency: "latest",
     initialData,
-    dataOnError: () => {
-      const fallback = initial ? initial() : undefined;
-      if (providedData) providedData.value = fallback;
-      return fallback;
-    },
     onSuccess: (queryData) => {
       if (providedData) providedData.value = queryData;
       onSuccess?.(queryData);

@@ -17,10 +17,7 @@ interface IFetchResult<
   DataRef extends Readonly<Ref<MaybeData<Initializer, Data>>> = ComputedRef<
     MaybeData<Initializer, Data>
   >,
-> extends Omit<
-  IQueryResult<Data, [AbortSignal], Initializer, DataRef>,
-  "trigger"
-> {
+> extends Omit<IQueryResult<Data, [AbortSignal], Initializer, DataRef>, "trigger"> {
   fetch: FetchTriggerHandler<Data>;
   abort: () => void;
 }
@@ -53,11 +50,7 @@ export function useFetch<Data>(
 export function useFetch<Data>(
   handler: FetchHandler<Data>,
   options?: QueryOptions<Data>,
-): IFetchResult<
-  Data,
-  DataInitializer<Data> | undefined,
-  Readonly<Ref<Data | undefined>>
-> {
+): IFetchResult<Data, DataInitializer<Data> | undefined, Readonly<Ref<Data | undefined>>> {
   const { data, error, loading, trigger } = useQuery(handler, options);
   let controller: AbortController | undefined;
 
