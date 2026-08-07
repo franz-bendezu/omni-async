@@ -2,7 +2,7 @@ import { expectTypeOf, it } from "vitest";
 import type { QueryResult } from "../src";
 import { useFetch, useQuery } from "../src";
 
-it("strongly types query and fetch results", () => {
+function useTypeAssertions() {
   const optionalQuery = useQuery(async () => "result");
   const initializedQuery = useQuery(async (id: number) => ({ id }), {
     initial: () => ({ id: 0 }),
@@ -21,6 +21,10 @@ it("strongly types query and fetch results", () => {
 
   // @ts-expect-error Initial data must match the handler's resolved value.
   useQuery(async () => "result", { initial: () => 1 });
+}
+
+it("strongly types query and fetch results", () => {
+  expectTypeOf(useTypeAssertions).toBeFunction();
 });
 
 it("defaults exported result data to optional", () => {
