@@ -32,7 +32,8 @@ const results = useQuery(
 ## APIs
 
 - `useAsync` returns computed data, error, and loading refs.
-- `useQuery` uses latest-request concurrency and can update a provided data ref.
+- `useQuery` uses latest-request concurrency and returns a provided data ref as writable shared
+  storage. Successful requests replace the ref value; rejected requests preserve it.
 - `useAction` provides a manually triggered action.
 - `useFetch` runs on mount and exposes `fetch()` and `abort()`.
 

@@ -33,6 +33,10 @@ export function useQuery<Data, P extends unknown[] = []>(
  * @param handler - Async query function invoked by `trigger`.
  * @param options - Initial data, shared data ref, and lifecycle callbacks.
  * @returns Query refs and a typed trigger function.
+ * @remarks
+ * When `options.data` is provided, the returned `data` is that exact writable ref. Accepted results
+ * replace its value, rejected requests preserve it, and a later success may overwrite manual edits.
+ * Synchronization is one-way: manual ref edits are not copied into the internal async snapshot.
  * @example
  * const users = useQuery(() => api.listUsers(), { initial: () => [] })
  * await users.trigger()

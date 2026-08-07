@@ -23,6 +23,17 @@ export type QueryOptions<T> = {
   initial?: DataInitializer<T>;
   onSuccess?: (data: T) => void;
   onError?: (error: unknown) => void;
+  /**
+   * Caller-owned writable storage for query data.
+   *
+   * When provided, this exact ref is returned as `result.data`. Its current value initializes the
+   * query, accepted successful results replace its value, and rejected requests preserve it. Manual
+   * changes are immediately visible through `result.data` but may be replaced by a later success.
+   *
+   * @remarks
+   * Synchronization is one-way from accepted request results into this ref. Manual changes to the
+   * ref are not copied into the composable's internal async snapshot.
+   */
   data?: Ref<T | undefined>;
 };
 
