@@ -191,14 +191,14 @@ export function useFetch<Data>(
   const query = useQuery(handler, options);
   let controller: AbortController | undefined;
   const abort = () => controller?.abort();
-  const fetch = () => {
+  const execute = () => {
     abort();
     controller = new AbortController();
     return query.trigger(controller.signal);
   };
 
   onMount(() => {
-    void fetch().catch(() => undefined);
+    void execute().catch(() => undefined);
   });
   onDestroy(abort);
 
@@ -206,7 +206,7 @@ export function useFetch<Data>(
     data: query.data,
     error: query.error,
     loading: query.loading,
-    fetch,
+    fetch: execute,
     abort,
   };
 }

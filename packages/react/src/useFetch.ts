@@ -34,7 +34,7 @@ export function useFetch<Data>(
     controllerRef.current = null;
   }, []);
 
-  const fetch = useCallback(() => {
+  const execute = useCallback(() => {
     abort();
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -42,15 +42,15 @@ export function useFetch<Data>(
   }, [abort, query.trigger]);
 
   useEffect(() => {
-    void fetch().catch(() => undefined);
+    void execute().catch(() => undefined);
     return abort;
-  }, [abort, fetch]);
+  }, [abort, execute]);
 
   return {
     data: query.data,
     error: query.error,
     loading: query.loading,
-    fetch,
+    fetch: execute,
     abort,
   };
 }
