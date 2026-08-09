@@ -54,17 +54,17 @@ export function useFetch<Data>(
     controller?.abort();
   };
 
-  const fetch = () => {
+  const execute = () => {
     abort();
     controller = new AbortController();
     return trigger(controller.signal);
   };
 
   onMounted(async () => {
-    await fetch();
+    await execute();
   });
 
   onScopeDispose(abort);
 
-  return { data, error, loading, fetch, abort };
+  return { data, error, loading, fetch: execute, abort };
 }
