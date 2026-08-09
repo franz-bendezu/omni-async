@@ -1,4 +1,4 @@
-import { onMounted, onScopeDispose } from "vue";
+import { onMounted, onScopeDispose } from "@vue/runtime-core";
 import type {
   DataInitializer,
   FetchHandler,
@@ -7,7 +7,7 @@ import type {
   QueryOptions,
   QueryOptionsWithData,
 } from "./types";
-import type { ComputedRef, Ref } from "vue";
+import type { ComputedRef, Ref } from "@vue/runtime-core";
 import { useQuery } from "./useQuery";
 
 interface IFetchResult<

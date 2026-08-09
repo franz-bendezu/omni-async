@@ -5,7 +5,7 @@ import type {
   QueryOptionsWithData,
   QueryOptionsWithInitial,
 } from "./types";
-import type { ComputedRef, Ref } from "vue";
+import type { ComputedRef, Ref } from "@vue/runtime-core";
 import { useAsync } from "./useAsync";
 
 export function useQuery<

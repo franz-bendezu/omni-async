@@ -6,7 +6,7 @@ export default defineConfig({
   dts: true,
   format: ["esm"],
   deps: {
-    neverBundle: ["vue"],
+    neverBundle: ["@vue/runtime-core"],
   },
   exports: {
     legacy: true,
