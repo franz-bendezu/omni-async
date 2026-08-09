@@ -43,7 +43,7 @@ you use when importing a framework subpath:
 
 ```bash
 pnpm add omni-async @omni-async/react react
-# or: omni-async @omni-async/vue vue
+# or: omni-async @omni-async/vue @vue/runtime-core vue
 # or: omni-async @omni-async/svelte svelte
 ```
 

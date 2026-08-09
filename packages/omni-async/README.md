@@ -16,7 +16,7 @@ import { createAsync } from "omni-async";
 Framework adapters are optional. Install the adapter and framework you use:
 
 ```bash
-pnpm add omni-async @omni-async/vue vue
+pnpm add omni-async @omni-async/vue @vue/runtime-core vue
 # or: @omni-async/react react
 # or: @omni-async/svelte svelte
 ```

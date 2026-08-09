@@ -5,10 +5,12 @@ Typed Vue composables for asynchronous queries, fetches, and actions.
 ## Install
 
 ```bash
-pnpm add @omni-async/vue
+pnpm add @omni-async/vue @vue/runtime-core
 ```
 
-Vue 3.2 and newer are supported.
+Vue runtime-core 3.2 and newer are supported. Existing Vue applications already
+include runtime-core; declaring it directly keeps the adapter's production graph
+independent of Vue's template compiler.
 
 ## Query
 
