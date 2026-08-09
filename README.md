@@ -38,6 +38,15 @@ Choose the unified package for one dependency and consistent subpath imports:
 pnpm add omni-async
 ```
 
+This installs only the framework-independent core. Add the adapter and framework
+you use when importing a framework subpath:
+
+```bash
+pnpm add omni-async @omni-async/react react
+# or: omni-async @omni-async/vue vue
+# or: omni-async @omni-async/svelte svelte
+```
+
 Or install only the standalone package for your runtime:
 
 ```bash
@@ -68,7 +77,7 @@ user.subscribe(() => console.log(user.getSnapshot()));
 await user.execute("42");
 ```
 
-Or use a framework adapter:
+Or use an installed framework adapter:
 
 ```tsx
 import { useQuery } from "omni-async/react";

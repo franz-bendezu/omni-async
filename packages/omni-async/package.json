@@ -39,9 +39,22 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@omni-async/core": "workspace:*",
+    "@omni-async/core": "workspace:*"
+  },
+  "peerDependencies": {
     "@omni-async/react": "workspace:*",
     "@omni-async/svelte": "workspace:*",
     "@omni-async/vue": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@omni-async/react": {
+      "optional": true
+    },
+    "@omni-async/svelte": {
+      "optional": true
+    },
+    "@omni-async/vue": {
+      "optional": true
+    }
   }
 }
