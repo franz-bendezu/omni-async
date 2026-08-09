@@ -21,13 +21,13 @@
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
-    "bumpp": "^12.1.1",
-    "jsdom": "^29.0.0",
+    "bumpp": "^12.2.0",
+    "jsdom": "^30.0.1",
     "oxfmt": "^0.62.0",
     "oxlint": "^1.77.0",
     "tsdown": "^0.22.14",
-    "turbo": "^2.10.8",
-    "typescript": "^5.9.3",
+    "turbo": "^2.10.9",
+    "typescript": "^7.0.2",
     "vitest": "4.1.10"
   },
   "packageManager": "pnpm@11.20.0"
