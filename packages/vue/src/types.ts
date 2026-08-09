@@ -1,4 +1,4 @@
-import type { ComputedRef, Ref } from "vue";
+import type { ComputedRef, Ref } from "@vue/runtime-core";
 
 export interface QueryHandler<Data, P extends unknown[]> {
   (...args: P): Promise<Data>;

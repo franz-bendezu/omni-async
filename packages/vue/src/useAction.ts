@@ -1,4 +1,4 @@
-import type { ComputedRef } from "vue";
+import type { ComputedRef } from "@vue/runtime-core";
 import type { ActionOptions, QueryHandler, TriggerHandler } from "./types";
 import { useAsync } from "./useAsync";
 

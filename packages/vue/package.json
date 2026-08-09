@@ -38,10 +38,11 @@
     "@omni-async/core": "workspace:*"
   },
   "devDependencies": {
+    "@vue/runtime-core": "^3.5.40",
     "@vue/test-utils": "^2.4.11",
     "vue": "^3.5.40"
   },
   "peerDependencies": {
-    "vue": "^3.2.0"
+    "@vue/runtime-core": "^3.2.0"
   }
 }

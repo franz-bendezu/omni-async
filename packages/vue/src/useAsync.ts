@@ -1,5 +1,5 @@
-import { computed, getCurrentScope, onScopeDispose, shallowRef } from "vue";
-import type { ComputedRef } from "vue";
+import { computed, getCurrentScope, onScopeDispose, shallowRef } from "@vue/runtime-core";
+import type { ComputedRef } from "@vue/runtime-core";
 import { createAsync } from "@omni-async/core";
 import type { AsyncState } from "@omni-async/core";
 import type { QueryHandler, TriggerHandler } from "./types";

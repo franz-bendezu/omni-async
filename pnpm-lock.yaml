@@ -98,6 +98,9 @@ importers:
         specifier: workspace:*
         version: link:../core
     devDependencies:
+      '@vue/runtime-core':
+        specifier: ^3.5.40
+        version: 3.5.40
       '@vue/test-utils':
         specifier: ^2.4.11
         version: 2.4.11(@vue/compiler-dom@3.5.40)(@vue/server-renderer@3.5.40)(vue@3.5.40(typescript@5.9.3))
