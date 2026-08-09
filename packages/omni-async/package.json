@@ -41,6 +41,11 @@
   "dependencies": {
     "@omni-async/core": "workspace:*"
   },
+  "devDependencies": {
+    "@omni-async/react": "workspace:*",
+    "@omni-async/svelte": "workspace:*",
+    "@omni-async/vue": "workspace:*"
+  },
   "peerDependencies": {
     "@omni-async/react": "workspace:*",
     "@omni-async/svelte": "workspace:*",
