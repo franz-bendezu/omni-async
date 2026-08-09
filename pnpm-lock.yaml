@@ -49,6 +49,7 @@ importers:
       '@omni-async/core':
         specifier: workspace:*
         version: link:../core
+    devDependencies:
       '@omni-async/react':
         specifier: workspace:*
         version: link:../react
@@ -834,6 +835,18 @@ packages:
     cpu: [x64]
     os: [linux]
     libc: [musl]
+
+  '@mdream/rust-wasm32-wasi@1.5.12':
+    resolution: {integrity: sha512-OGriLOVHwOlXG067QKLqnGwfz+CaPKW816cG1IFrmHSAEgIA6UJzQ6zMfr0DK7yu2PGh0pkAmiurIDMt8l6/QA==}
+    engines: {node: '>= 22.0.0'}
+    cpu: [wasm32]
+    bundledDependencies:
+      - '@napi-rs/wasm-runtime'
+      - '@emnapi/core'
+      - '@emnapi/runtime'
+      - '@tybys/wasm-util'
+      - '@emnapi/wasi-threads'
+      - tslib
 
   '@mdream/rust-win32-arm64-msvc@1.5.12':
     resolution: {integrity: sha512-CxWFPKA5Fue0xC/OOqfqPLbH1hQfQrjKOHqISoQd+Yw1C8gP5ndKE/TUfyRi68GCJDYLAa9ijGkab5lWWblKPA==}
@@ -7418,6 +7431,9 @@ snapshots:
   '@mdream/rust-linux-x64-musl@1.5.12':
     optional: true
 
+  '@mdream/rust-wasm32-wasi@1.5.12':
+    optional: true
+
   '@mdream/rust-win32-arm64-msvc@1.5.12':
     optional: true
 
@@ -11744,6 +11760,7 @@ snapshots:
       '@mdream/rust-linux-arm64-musl': 1.5.12
       '@mdream/rust-linux-x64-gnu': 1.5.12
       '@mdream/rust-linux-x64-musl': 1.5.12
+      '@mdream/rust-wasm32-wasi': 1.5.12
       '@mdream/rust-win32-arm64-msvc': 1.5.12
       '@mdream/rust-win32-x64-msvc': 1.5.12
 
