@@ -5,8 +5,9 @@ import type {
   QueryOptionsWithData,
   QueryOptionsWithInitial,
 } from "./types";
+import { computed, shallowRef } from "@vue/runtime-core";
 import type { ComputedRef, Ref } from "@vue/runtime-core";
-import { useAsync } from "./useAsync";
+import { useAsyncWithData } from "./useAsync";
 
 export function useQuery<
   Data,
@@ -34,9 +35,8 @@ export function useQuery<Data, P extends unknown[] = []>(
  * @param options - Initial data, shared data ref, and lifecycle callbacks.
  * @returns Query refs and a typed trigger function.
  * @remarks
- * When `options.data` is provided, the returned `data` is that exact writable ref. Accepted results
- * replace its value, rejected requests preserve it, and a later success may overwrite manual edits.
- * Synchronization is one-way: manual ref edits are not copied into the internal async snapshot.
+ * When `options.data` is provided, the returned `data` is that exact writable ref and the query's
+ * data storage. Accepted results replace its value; rejected requests preserve manual edits.
  * @example
  * const users = useQuery(() => api.listUsers(), { initial: () => [] })
  * await users.trigger()
@@ -48,18 +48,22 @@ export function useQuery<Data, P extends unknown[] = []>(
   const { initial, onError, onSuccess, data: providedData } = options || {};
   const initialData = providedData ? providedData.value : initial?.();
 
-  const result = useAsync<Data, P, undefined>(handler, {
-    concurrency: "latest",
-    initialData,
-    onSuccess: (queryData) => {
-      if (providedData) providedData.value = queryData;
-      onSuccess?.(queryData);
+  const storage = (providedData ?? shallowRef(initialData)) as Ref<Data | undefined>;
+  const result = useAsyncWithData<Data, P, undefined>(
+    handler,
+    {
+      concurrency: "latest",
+      initialData,
+      onSuccess: (queryData) => {
+        onSuccess?.(queryData);
+      },
+      onError: (caughtError) => {
+        onError?.(caughtError);
+      },
     },
-    onError: (caughtError) => {
-      onError?.(caughtError);
-    },
-  });
-  const data = providedData ?? result.data;
+    storage,
+  );
+  const data = providedData ?? computed(() => storage.value);
 
   return {
     data,

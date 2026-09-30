@@ -1,6 +1,6 @@
 import { computed, getCurrentScope, onScopeDispose, shallowRef } from "@vue/runtime-core";
-import type { ComputedRef } from "@vue/runtime-core";
-import { createAsync } from "@omni-async/core";
+import type { ComputedRef, Ref } from "@vue/runtime-core";
+import { createRequestLifecycle } from "@omni-async/core";
 import type { AsyncState } from "@omni-async/core";
 import type { QueryHandler, TriggerHandler } from "./types";
 
@@ -47,40 +47,67 @@ export function useAsync<Data, P extends unknown[] = []>(
   handler: QueryHandler<Data, P>,
   options: AsyncOptions<Data, null | undefined> = {},
 ): AsyncResult<Data, P, null | undefined> {
-  const { concurrency = "all", dataOnError, initialData, isEqual, onError, onSuccess } = options;
-  const operationOptions = {
-    concurrency,
-    ...(dataOnError ? { dataOnError } : {}),
-    ...(isEqual ? { isEqual } : {}),
-    ...("initialData" in options ? { initialData } : {}),
-    onError,
-    onSuccess,
-  };
-  const operation = createAsync<Data, P, null | undefined>(
-    async (_context, ...params: P) => handler(...params),
-    {
-      ...operationOptions,
-      initialData: "initialData" in options ? initialData : null,
-    },
-  );
-  const state = shallowRef(operation.getSnapshot());
-  const error = computed(() => state.value.error);
-  const loading = computed(() => state.value.isLoading);
-  const data = computed(() => state.value.data);
+  const storage = shallowRef<Data | null | undefined>(
+    "initialData" in options ? options.initialData : null,
+  ) as Ref<Data | null | undefined>;
+  const result = useAsyncWithData(handler, options, storage);
+  return { ...result, data: computed(() => storage.value) };
+}
 
-  const updateState = () => {
-    state.value = operation.getSnapshot();
+// Internal state adapter for queries that receive a caller-owned ref.
+export function useAsyncWithData<Data, P extends unknown[], Empty extends null | undefined>(
+  handler: QueryHandler<Data, P>,
+  options: AsyncOptions<Data, Empty>,
+  data: Ref<Data | Empty>,
+) {
+  const lifecycle = createRequestLifecycle({ concurrency: options.concurrency });
+  const status = shallowRef<"idle" | "loading" | "success" | "error">("idle");
+  const error = shallowRef<unknown | null>(null);
+  const loading = shallowRef(false);
+  const readState = (): Readonly<AsyncState<Data, null | undefined>> => ({
+    status: status.value,
+    data: data.value,
+    error: error.value,
+    isLoading: loading.value,
+  });
+  const commit = (next: Readonly<AsyncState<Data, null | undefined>>) => {
+    if (options.isEqual?.(readState(), next)) return;
+    status.value = next.status;
+    data.value = next.data as Data | Empty;
+    error.value = next.error;
+    loading.value = next.isLoading;
   };
-  const unsubscribe = operation.subscribe(updateState);
+  const trigger: TriggerHandler<Data, P> = (...params) =>
+    lifecycle.execute(async (_context, ...args) => handler(...args), params, {
+      start() {
+        commit({ ...readState(), status: "loading", error: null, isLoading: true });
+      },
+      success(result, isLoading) {
+        commit({ status: "success", data: result, error: null, isLoading });
+        options.onSuccess?.(result);
+      },
+      error(caughtError, isLoading) {
+        commit({
+          ...readState(),
+          status: "error",
+          data: options.dataOnError ? options.dataOnError(caughtError) : data.value,
+          error: caughtError,
+          isLoading,
+        });
+        options.onError?.(caughtError);
+      },
+    });
 
   if (getCurrentScope()) {
     onScopeDispose(() => {
-      unsubscribe();
-      operation.abort();
+      lifecycle.abort();
     });
   }
 
-  const trigger: TriggerHandler<Data, P> = (...params) => operation.execute(...params);
-
-  return { data, error, loading, trigger };
+  return {
+    data,
+    error: computed(() => error.value),
+    loading: computed(() => loading.value),
+    trigger,
+  };
 }

@@ -4,9 +4,9 @@
 
 <h1 align="center">Omni Async</h1>
 
-<p align="center">One typed async state engine for TypeScript, React, Vue, and Svelte.</p>
+<p align="center">Async request state for JavaScript, TypeScript, React, Vue, and Svelte.</p>
 
-Omni Async centralizes request lifecycle, concurrency, cancellation, and notifications in a dependency-free core. Framework adapters translate the same immutable snapshots into native hooks, refs, computed values, and readable stores.
+Omni Async centralizes request lifecycle, concurrency, and cancellation in a dependency-free core. The standalone core exposes immutable snapshots and subscriptions; framework adapters keep state in native React hooks, Vue refs, and Svelte stores.
 
 ## Why Omni Async?
 
@@ -24,7 +24,7 @@ Omni Async centralizes request lifecycle, concurrency, cancellation, and notific
 | ----------------------------------------- | ----------------------------------------------- |
 | [`omni-async`](./packages/omni-async)     | Unified package with framework subpath exports  |
 | [`@omni-async/core`](./packages/core)     | Dependency-free async operations for TypeScript |
-| [`@omni-async/react`](./packages/react)   | React hooks using `useSyncExternalStore`        |
+| [`@omni-async/react`](./packages/react)   | React hooks using React-owned state             |
 | [`@omni-async/vue`](./packages/vue)       | Vue composables using refs and computed state   |
 | [`@omni-async/svelte`](./packages/svelte) | Svelte readable stores and lifecycle helpers    |
 
@@ -54,7 +54,7 @@ pnpm add @omni-async/core
 # or: @omni-async/react, @omni-async/vue, @omni-async/svelte
 ```
 
-Create a framework-independent operation:
+Create a framework-independent operation in TypeScript or vanilla JavaScript:
 
 ```ts
 import { createAsync } from "omni-async";

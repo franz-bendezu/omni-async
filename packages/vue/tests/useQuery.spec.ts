@@ -82,4 +82,24 @@ describe("useQuery", () => {
     expect(data.value).toEqual(["existing"]);
     expect(query.data).toBe(data);
   });
+
+  it("keeps a supplied ref authoritative while a request is pending", async () => {
+    let resolveRequest!: (value: string) => void;
+    const data = shallowRef<string | undefined>("initial");
+    const query = useQuery(
+      () =>
+        new Promise<string>((resolve) => {
+          resolveRequest = resolve;
+        }),
+      { data },
+    );
+
+    const request = query.trigger();
+    data.value = "manual";
+    expect(query.data.value).toBe("manual");
+    resolveRequest("server");
+    await request;
+    expect(query.data.value).toBe("server");
+    expect(query.data).toBe(data);
+  });
 });

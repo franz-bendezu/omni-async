@@ -36,4 +36,8 @@ function Search() {
 - `useAction` provides a manually triggered action without a data field.
 - `useFetch` runs on mount and exposes `fetch()` and `abort()`.
 
+`useAction` is an imperative async helper, distinct from React 19's `useActionState`.
+It can call a Server Function imported into a Client Component when the application framework
+supports Server Functions. Use `useActionState` for React form state and submissions before hydration.
+
 See the [React guide](https://franz-bendezu.github.io/omni-async/frameworks/react).

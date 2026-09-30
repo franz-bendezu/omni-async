@@ -1,6 +1,6 @@
 # `@omni-async/core`
 
-Dependency-free asynchronous state operations for TypeScript.
+Dependency-free asynchronous state operations for JavaScript and TypeScript.
 
 ## Install
 
@@ -44,5 +44,11 @@ unsubscribe();
 - `execute(...params)` runs the typed handler.
 - `abort()` invalidates active work and aborts supported handlers.
 - `reset()` restores the initial state.
+
+For vanilla JavaScript, use the same `createAsync` API without type annotations. Subscribe to
+snapshots to update the DOM, and call the returned unsubscribe function when removing the view.
+
+`createRequestLifecycle` is available for adapters that own their own state. It tracks which
+requests may commit and supports cancellation; it does not store data, errors, or loading state.
 
 See the [full documentation](https://franz-bendezu.github.io/omni-async/api).

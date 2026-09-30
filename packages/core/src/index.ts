@@ -1,3 +1,7 @@
+import { createRequestLifecycle } from "./requestLifecycle";
+export { createRequestLifecycle } from "./requestLifecycle";
+export type { RequestLifecycle } from "./requestLifecycle";
+
 /** Lifecycle status of an asynchronous operation. */
 export type AsyncStatus = "idle" | "loading" | "success" | "error";
 
@@ -64,13 +68,6 @@ export type AsyncOperation<
   abort(): void;
   /** Invalidates active requests and restores the initial state. */
   reset(): void;
-};
-
-type ActiveRequest = {
-  generationId: number;
-  requestId: number;
-  controller: AbortController | null;
-  cancelled: boolean;
 };
 
 function isAsyncStateEqual<Data, Empty extends null | undefined>(
@@ -143,10 +140,7 @@ export function createAsync<Data, Params extends unknown[] = []>(
   } = options;
   const initialData = "initialData" in options ? options.initialData : null;
   const listeners = new Set<() => void>();
-  const activeRequests = new Set<ActiveRequest>();
-  let activeRequestCount = 0;
-  let generationId = 0;
-  let latestRequestId = 0;
+  const lifecycle = createRequestLifecycle({ concurrency, abortable });
   let state: Readonly<AsyncState<Data, null | undefined>> = Object.freeze({
     status: "idle",
     data: initialData,
@@ -166,97 +160,35 @@ export function createAsync<Data, Params extends unknown[] = []>(
     notify();
   };
 
-  const canUpdateState = (request: ActiveRequest) =>
-    request.generationId === generationId &&
-    !request.cancelled &&
-    (concurrency === "all" || request.requestId === latestRequestId);
-
-  const invalidateActiveRequests = () => {
-    for (const request of activeRequests) {
-      request.cancelled = true;
-      request.controller?.abort();
-    }
-    activeRequestCount = 0;
-  };
-
-  const execute = async (...params: Params): Promise<Data> => {
-    const request: ActiveRequest = {
-      generationId,
-      requestId: ++latestRequestId,
-      controller: abortable ? new AbortController() : null,
-      cancelled: false,
-    };
-    activeRequests.add(request);
-    activeRequestCount += 1;
-    updateState({
-      ...state,
-      status: "loading",
-      error: null,
-      isLoading: true,
-    });
-
-    let finished = false;
-    const finishRequest = () => {
-      if (finished) return;
-      finished = true;
-      activeRequests.delete(request);
-      if (request.generationId === generationId && !request.cancelled) {
-        activeRequestCount -= 1;
-      }
-    };
-    const isStillLoading = () => (concurrency === "all" ? activeRequestCount > 0 : false);
-
-    try {
-      const data = await handler(
-        { signal: request.controller?.signal ?? null, requestId: request.requestId },
-        ...params,
-      );
-      finishRequest();
-      if (canUpdateState(request)) {
-        updateState({
-          status: "success",
-          data,
-          error: null,
-          isLoading: isStillLoading(),
-        });
+  const execute = (...params: Params): Promise<Data> =>
+    lifecycle.execute(handler, params, {
+      start() {
+        updateState({ ...state, status: "loading", error: null, isLoading: true });
+      },
+      success(data, isLoading) {
+        updateState({ status: "success", data, error: null, isLoading });
         onSuccess?.(data);
-      }
-      return data;
-    } catch (error) {
-      finishRequest();
-      if (canUpdateState(request)) {
+      },
+      error(error, isLoading) {
         updateState({
           ...state,
           status: "error",
           data: dataOnError ? dataOnError(error) : state.data,
           error,
-          isLoading: isStillLoading(),
+          isLoading,
         });
         onError?.(error);
-      }
-      throw error;
-    } finally {
-      finishRequest();
-    }
-  };
+      },
+    });
 
   const abort = () => {
-    if (activeRequests.size === 0) return;
-
-    invalidateActiveRequests();
+    if (!lifecycle.abort()) return;
     updateState({ ...state, status: "idle", error: null, isLoading: false });
   };
 
   const reset = () => {
-    invalidateActiveRequests();
-    generationId += 1;
-    latestRequestId += 1;
-    updateState({
-      status: "idle",
-      data: initialData,
-      error: null,
-      isLoading: false,
-    });
+    lifecycle.reset();
+    updateState({ status: "idle", data: initialData, error: null, isLoading: false });
   };
 
   return {
