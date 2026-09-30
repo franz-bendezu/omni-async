@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
-import { createAsync } from "@omni-async/core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createRequestLifecycle } from "@omni-async/core";
 import type { AsyncState } from "@omni-async/core";
 import type { QueryHandler, TriggerHandler } from "./types";
 
@@ -62,47 +62,59 @@ export function useAsync<Data, Params extends unknown[] = []>(
   isEqualRef.current = options.isEqual;
 
   const concurrency = options.concurrency ?? "all";
-  const hasInitialData = "initialData" in options;
-  const hasErrorData = options.dataOnError !== undefined;
-  const hasCustomEquality = options.isEqual !== undefined;
-  const operation = useMemo(() => {
-    const operationOptions = {
-      concurrency,
-      ...(hasInitialData ? { initialData: options.initialData } : {}),
-      ...(hasErrorData
-        ? {
-            dataOnError: (error: unknown) => dataOnErrorRef.current?.(error),
-          }
-        : {}),
-      onSuccess: (data: Data) => onSuccessRef.current?.(data),
-      onError: (error: unknown) => onErrorRef.current?.(error),
-      ...(hasCustomEquality
-        ? {
-            isEqual: (
-              previous: Readonly<AsyncState<Data, null | undefined>>,
-              next: Readonly<AsyncState<Data, null | undefined>>,
-            ) => isEqualRef.current?.(previous, next) ?? false,
-          }
-        : {}),
-    };
-    return createAsync<Data, Params, null | undefined>(
-      async (_context, ...params: Params) => handlerRef.current(...params),
-      {
-        ...operationOptions,
-        initialData: "initialData" in options ? options.initialData : null,
-      },
-    );
-  }, [concurrency, hasCustomEquality, hasErrorData, hasInitialData]);
+  const lifecycle = useMemo(() => createRequestLifecycle({ concurrency }), [concurrency]);
+  const [snapshot, setSnapshot] = useState<Readonly<AsyncState<Data, null | undefined>>>(() => ({
+    status: "idle",
+    data: "initialData" in options ? options.initialData : null,
+    error: null,
+    isLoading: false,
+  }));
+  const snapshotRef = useRef(snapshot);
+  snapshotRef.current = snapshot;
+  const commit = useCallback((next: Readonly<AsyncState<Data, null | undefined>>) => {
+    if (isEqualRef.current?.(snapshotRef.current, next)) return;
+    if (
+      !isEqualRef.current &&
+      snapshotRef.current.status === next.status &&
+      Object.is(snapshotRef.current.data, next.data) &&
+      Object.is(snapshotRef.current.error, next.error) &&
+      snapshotRef.current.isLoading === next.isLoading
+    )
+      return;
+    snapshotRef.current = next;
+    setSnapshot(next);
+  }, []);
 
-  const snapshot = useSyncExternalStore(
-    operation.subscribe,
-    operation.getSnapshot,
-    operation.getSnapshot,
+  useEffect(
+    () => () => {
+      lifecycle.abort();
+    },
+    [lifecycle],
   );
 
-  useEffect(() => () => operation.abort(), [operation]);
-
-  const trigger = useCallback((...params: Params) => operation.execute(...params), [operation]);
+  const trigger = useCallback(
+    (...params: Params) =>
+      lifecycle.execute(async (_context, ...args: Params) => handlerRef.current(...args), params, {
+        start() {
+          commit({ ...snapshotRef.current, status: "loading", error: null, isLoading: true });
+        },
+        success(data, isLoading) {
+          commit({ status: "success", data, error: null, isLoading });
+          onSuccessRef.current?.(data);
+        },
+        error(error, isLoading) {
+          commit({
+            ...snapshotRef.current,
+            status: "error",
+            data: dataOnErrorRef.current ? dataOnErrorRef.current(error) : snapshotRef.current.data,
+            error,
+            isLoading,
+          });
+          onErrorRef.current?.(error);
+        },
+      }),
+    [lifecycle, commit],
+  );
 
   return {
     data: snapshot.data,

@@ -1,7 +1,7 @@
-import { createAsync } from "@omni-async/core";
+import { createRequestLifecycle } from "@omni-async/core";
 import type { AsyncOptions as CoreOptions, AsyncState } from "@omni-async/core";
 import { onDestroy, onMount } from "svelte";
-import { derived, readable } from "svelte/store";
+import { derived, get, writable } from "svelte/store";
 import type { Readable } from "svelte/store";
 
 export type QueryHandler<Data, Params extends unknown[]> = (...params: Params) => Promise<Data>;
@@ -50,25 +50,53 @@ export function useAsync<Data, Params extends unknown[] = []>(
   handler: QueryHandler<Data, Params>,
   options: AsyncOptions<Data, null | undefined> = {},
 ): AsyncResult<Data, Params, null | undefined> {
-  const operation = createAsync<Data, Params, null | undefined>(
-    async (_context, ...params) => handler(...params),
-    {
-      ...options,
-      initialData: "initialData" in options ? options.initialData : null,
-    },
-  );
-  const state = readable<Readonly<AsyncState<Data, null | undefined>>>(
-    operation.getSnapshot(),
-    (set) => operation.subscribe(() => set(operation.getSnapshot())),
-  );
+  const lifecycle = createRequestLifecycle({ concurrency: options.concurrency });
+  const state = writable<Readonly<AsyncState<Data, null | undefined>>>({
+    status: "idle",
+    data: "initialData" in options ? options.initialData : null,
+    error: null,
+    isLoading: false,
+  });
+  const commit = (next: Readonly<AsyncState<Data, null | undefined>>) => {
+    const snapshot = get(state);
+    const equal = options.isEqual
+      ? options.isEqual(snapshot, next)
+      : snapshot.status === next.status &&
+        Object.is(snapshot.data, next.data) &&
+        Object.is(snapshot.error, next.error) &&
+        snapshot.isLoading === next.isLoading;
+    if (equal) return;
+    state.set(next);
+  };
+  const trigger = (...params: Params) =>
+    lifecycle.execute(async (_context, ...args: Params) => handler(...args), params, {
+      start() {
+        commit({ ...get(state), status: "loading", error: null, isLoading: true });
+      },
+      success(result, isLoading) {
+        commit({ status: "success", data: result, error: null, isLoading });
+        options.onSuccess?.(result);
+      },
+      error(caughtError, isLoading) {
+        const snapshot = get(state);
+        commit({
+          ...snapshot,
+          status: "error",
+          data: options.dataOnError ? options.dataOnError(caughtError) : snapshot.data,
+          error: caughtError,
+          isLoading,
+        });
+        options.onError?.(caughtError);
+      },
+    });
 
-  onDestroy(() => operation.abort());
+  onDestroy(() => lifecycle.abort());
 
   return {
     data: derived(state, ($state) => $state.data),
     error: derived(state, ($state) => $state.error),
     loading: derived(state, ($state) => $state.isLoading),
-    trigger: (...params) => operation.execute(...params),
+    trigger,
   };
 }
 
