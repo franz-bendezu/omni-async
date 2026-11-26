@@ -38,9 +38,9 @@
     "@omni-async/core": "workspace:*"
   },
   "devDependencies": {
-    "svelte": "^5.57.2"
+    "svelte": "^5.59.1"
   },
   "peerDependencies": {
-    "svelte": "^5.57.2"
+    "svelte": "^5.59.1"
   }
 }
